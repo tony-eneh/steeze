@@ -10,6 +10,7 @@ import { DesignersModule } from './modules/designers/designers.module';
 import { DesignsModule } from './modules/designs/designs.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { MeasurementsModule } from './modules/measurements/measurements.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { configValidationSchema } from './config/env.validation';
 
 @Module({
@@ -26,6 +27,7 @@ import { configValidationSchema } from './config/env.validation';
     DesignsModule,
     OrdersModule,
     MeasurementsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

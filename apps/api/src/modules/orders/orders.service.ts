@@ -3,6 +3,8 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -11,6 +13,7 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 import { OrderStatus } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { OpenTailorService } from '../measurements/open-tailor.service';
+import { PaymentsService } from '../payments/payments.service';
 
 @Injectable()
 export class OrdersService {
@@ -18,6 +21,8 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly openTailorService: OpenTailorService,
+    @Inject(forwardRef(() => PaymentsService))
+    private readonly paymentsService: PaymentsService,
   ) {}
 
   async create(userId: string, createOrderDto: CreateOrderDto) {
@@ -521,13 +526,23 @@ export class OrdersService {
       throw new BadRequestException('Order must be delivered to confirm');
     }
 
-    return this.updateOrderStatus(
+    const updatedOrder = await this.updateOrderStatus(
       order.id,
       OrderStatus.CONFIRMED,
       userId,
       updateDto.note || 'Customer confirmed satisfaction',
       { confirmedAt: new Date() },
     );
+
+    // Release funds to designer
+    try {
+      await this.paymentsService.releaseFunds(order.id);
+    } catch (error) {
+      // Log error but don't fail the confirmation
+      console.error('Error releasing funds:', error);
+    }
+
+    return updatedOrder;
   }
 
   // Cancel order (only before accepted)
