@@ -1,0 +1,417 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ──────────────────────────────────────────────
+
+enum UserRole {
+  CUSTOMER
+  DESIGNER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT      // Order created, awaiting payment
+  PAID                 // Payment received, funds in escrow
+  ACCEPTED             // Designer accepted the order
+  REJECTED             // Designer rejected the order
+  IN_PROGRESS          // Designer is working on the garment
+  READY_FOR_PICKUP     // Designer done, awaiting Steeze courier pickup
+  PICKED_UP            // Courier picked up from designer
+  IN_TRANSIT           // Courier en route to customer
+  DELIVERED            // Delivered to customer
+  CONFIRMED            // Customer confirmed satisfaction — funds released
+  AUTO_CONFIRMED       // 2-day window passed — auto-confirmed
+  RETURN_REQUESTED     // Customer requested return within 2 days
+  RETURN_PICKUP        // Courier dispatched to pick up return
+  RETURN_IN_TRANSIT    // Return en route to designer
+  RETURNED             // Item returned to designer — refund processed
+  CANCELLED            // Order cancelled before production
+  DISPUTED             // Under admin review
+}
+
+enum PaymentStatus {
+  PENDING
+  HELD_IN_ESCROW
+  RELEASED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum TransactionType {
+  ESCROW_HOLD
+  ESCROW_RELEASE
+  REFUND
+  COMMISSION_DEDUCTION
+  RETURN_FEE_DEDUCTION
+  WITHDRAWAL
+}
+
+enum NotificationType {
+  ORDER_UPDATE
+  PAYMENT_UPDATE
+  RATING_RECEIVED
+  RETURN_UPDATE
+  SYSTEM
+}
+
+// ─── MODELS ─────────────────────────────────────────────
+
+model User {
+  id                 String           @id @default(uuid())
+  email              String           @unique
+  passwordHash       String
+  firstName          String
+  lastName           String
+  phone              String?
+  avatarUrl          String?
+  role               UserRole         @default(CUSTOMER)
+  isEmailVerified    Boolean          @default(false)
+  isActive           Boolean          @default(true)
+  openTailorEmail    String?          // email used on Open Tailor for measurements
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  // Relations
+  addresses          Address[]
+  designerProfile    DesignerProfile?
+  ordersAsCustomer   Order[]          @relation("CustomerOrders")
+  ratingsGiven       Rating[]         @relation("RaterRatings")
+  ratingsReceived    Rating[]         @relation("RateeRatings")
+  notifications      Notification[]
+  walletTransactions WalletTransaction[]
+
+  @@map("users")
+}
+
+model Address {
+  id            String   @id @default(uuid())
+  userId        String
+  label         String?  // "Home", "Office", etc.
+  street        String
+  city          String
+  state         String
+  country       String   @default("Nigeria")
+  postalCode    String?
+  isDefault     Boolean  @default(false)
+  latitude      Float?
+  longitude     Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders        Order[]
+
+  @@map("addresses")
+}
+
+model DesignerProfile {
+  id                String    @id @default(uuid())
+  userId            String    @unique
+  businessName      String
+  slug              String    @unique   // URL-friendly name
+  bio               String?
+  shopAddress       String    // Physical location for courier pickup
+  shopCity          String
+  shopState         String
+  shopLatitude      Float?
+  shopLongitude     Float?
+  isVerified        Boolean   @default(false)
+  averageRating     Float     @default(0)
+  totalCompletedOrders Int    @default(0)
+  bannerUrl         String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  designs           Design[]
+  ordersAsDesigner  Order[]   @relation("DesignerOrders")
+
+  @@map("designer_profiles")
+}
+
+model Design {
+  id                String          @id @default(uuid())
+  designerId        String
+  title             String
+  description       String
+  basePrice         Decimal         @db.Decimal(12, 2) // Base price before options
+  currency          String          @default("NGN")
+  category          String          // e.g. "Agbada", "Gown", "Suit", "Casual", etc.
+  gender            String?         // "male", "female", "unisex"
+  estimatedDays     Int?            // Estimated production time in days
+  isPublished       Boolean         @default(false)
+  isActive          Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  designer          DesignerProfile @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  images            DesignImage[]
+  fabricOptions     FabricOption[]
+  addOns            DesignAddOn[]
+  sizePricings      SizePricing[]
+  orders            Order[]
+
+  @@map("designs")
+}
+
+model DesignImage {
+  id          String   @id @default(uuid())
+  designId    String
+  url         String
+  altText     String?
+  sortOrder   Int      @default(0)
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  design      Design   @relation(fields: [designId], references: [id], onDelete: Cascade)
+
+  @@map("design_images")
+}
+
+model FabricOption {
+  id          String   @id @default(uuid())
+  designId    String
+  name        String   // e.g. "Ankara Cotton", "Silk", "Linen"
+  color       String?  // e.g. "#FF5733" or "Navy Blue"
+  colorHex    String?  // Hex code for UI rendering
+  imageUrl    String?  // Fabric swatch image
+  priceAdjustment Decimal @default(0) @db.Decimal(12, 2) // Added to base price
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  design      Design   @relation(fields: [designId], references: [id], onDelete: Cascade)
+  orderItems  OrderFabricSelection[]
+
+  @@map("fabric_options")
+}
+
+model DesignAddOn {
+  id          String   @id @default(uuid())
+  designId    String
+  name        String   // e.g. "Embroidery", "Custom buttons", "Lining"
+  description String?
+  price       Decimal  @db.Decimal(12, 2) // Additional cost
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  design      Design   @relation(fields: [designId], references: [id], onDelete: Cascade)
+  orderItems  OrderAddOnSelection[]
+
+  @@map("design_add_ons")
+}
+
+model SizePricing {
+  id          String   @id @default(uuid())
+  designId    String
+  sizeLabel   String   // e.g. "S", "M", "L", "XL", "XXL", "Custom"
+  priceAdjustment Decimal @default(0) @db.Decimal(12, 2) // Added to base price
+  createdAt   DateTime @default(now())
+
+  design      Design   @relation(fields: [designId], references: [id], onDelete: Cascade)
+
+  @@unique([designId, sizeLabel])
+  @@map("size_pricings")
+}
+
+model Order {
+  id                    String            @id @default(uuid())
+  orderNumber           String            @unique // Human-readable: STZ-20260210-XXXX
+  customerId            String
+  designerId            String
+  designId              String
+  deliveryAddressId     String
+  status                OrderStatus       @default(PENDING_PAYMENT)
+
+  // Pricing breakdown
+  basePrice             Decimal           @db.Decimal(12, 2)
+  fabricPriceAdjustment Decimal           @default(0) @db.Decimal(12, 2)
+  sizePriceAdjustment   Decimal           @default(0) @db.Decimal(12, 2)
+  addOnsTotal           Decimal           @default(0) @db.Decimal(12, 2)
+  deliveryFee           Decimal           @default(0) @db.Decimal(12, 2)
+  totalPrice            Decimal           @db.Decimal(12, 2)
+  platformCommission    Decimal           @default(0) @db.Decimal(12, 2)
+  currency              String            @default("NGN")
+
+  // Measurement snapshot (from Open Tailor at time of order)
+  measurementSnapshot   Json?             // Stores full measurement data for posterity
+
+  // Size info
+  sizeLabel             String?           // e.g. "L" or "Custom"
+
+  // Customer notes
+  specialInstructions   String?
+
+  // Timestamps
+  paidAt                DateTime?
+  acceptedAt            DateTime?
+  readyAt               DateTime?         // Designer marked ready
+  pickedUpAt            DateTime?         // Courier picked up from designer
+  deliveredAt           DateTime?
+  confirmedAt           DateTime?
+  autoConfirmDeadline   DateTime?         // deliveredAt + 2 days
+  returnRequestedAt     DateTime?
+  returnedAt            DateTime?
+  cancelledAt           DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  // Relations
+  customer              User              @relation("CustomerOrders", fields: [customerId], references: [id])
+  designer              DesignerProfile   @relation("DesignerOrders", fields: [designerId], references: [id])
+  design                Design            @relation(fields: [designId], references: [id])
+  deliveryAddress       Address           @relation(fields: [deliveryAddressId], references: [id])
+  fabricSelection       OrderFabricSelection?
+  addOnSelections       OrderAddOnSelection[]
+  payment               Payment?
+  returnRequest         ReturnRequest?
+  ratings               Rating[]
+  statusHistory         OrderStatusHistory[]
+
+  @@index([customerId])
+  @@index([designerId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderFabricSelection {
+  id             String       @id @default(uuid())
+  orderId        String       @unique
+  fabricOptionId String
+
+  order          Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fabricOption   FabricOption @relation(fields: [fabricOptionId], references: [id])
+
+  @@map("order_fabric_selections")
+}
+
+model OrderAddOnSelection {
+  id          String      @id @default(uuid())
+  orderId     String
+  addOnId     String
+  price       Decimal     @db.Decimal(12, 2) // Price at time of order
+
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  addOn       DesignAddOn @relation(fields: [addOnId], references: [id])
+
+  @@unique([orderId, addOnId])
+  @@map("order_add_on_selections")
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  fromStatus OrderStatus?
+  toStatus  OrderStatus
+  note      String?
+  changedBy String?     // userId or "SYSTEM"
+  createdAt DateTime    @default(now())
+
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_status_history")
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  orderId           String        @unique
+  externalRef       String?       // Paystack/Stripe reference
+  amount            Decimal       @db.Decimal(12, 2)
+  currency          String        @default("NGN")
+  status            PaymentStatus @default(PENDING)
+  paidAt            DateTime?
+  releasedAt        DateTime?
+  refundedAt        DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  order             Order         @relation(fields: [orderId], references: [id])
+  transactions      WalletTransaction[]
+
+  @@map("payments")
+}
+
+model WalletTransaction {
+  id          String          @id @default(uuid())
+  userId      String
+  paymentId   String?
+  type        TransactionType
+  amount      Decimal         @db.Decimal(12, 2)
+  currency    String          @default("NGN")
+  description String?
+  createdAt   DateTime        @default(now())
+
+  user        User            @relation(fields: [userId], references: [id])
+  payment     Payment?        @relation(fields: [paymentId], references: [id])
+
+  @@index([userId])
+  @@map("wallet_transactions")
+}
+
+model Rating {
+  id          String   @id @default(uuid())
+  orderId     String
+  raterId     String   // The user giving the rating
+  rateeId     String   // The user receiving the rating
+  score       Int      // 1-5
+  comment     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  order       Order    @relation(fields: [orderId], references: [id])
+  rater       User     @relation("RaterRatings", fields: [raterId], references: [id])
+  ratee       User     @relation("RateeRatings", fields: [rateeId], references: [id])
+
+  @@unique([orderId, raterId]) // One rating per user per order
+  @@map("ratings")
+}
+
+model ReturnRequest {
+  id              String      @id @default(uuid())
+  orderId         String      @unique
+  reason          String
+  status          String      @default("PENDING") // PENDING, APPROVED, PICKUP_DISPATCHED, RETURNED, REJECTED
+  courierFee      Decimal?    @db.Decimal(12, 2)  // Flat fee deducted from designer
+  adminNotes      String?
+  requestedAt     DateTime    @default(now())
+  resolvedAt      DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  order           Order       @relation(fields: [orderId], references: [id])
+
+  @@map("return_requests")
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  type        NotificationType
+  title       String
+  body        String
+  data        Json?            // Additional context payload
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+model PlatformSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique // e.g. "commission_percentage", "return_courier_fee", "auto_confirm_days"
+  value     String   // Stored as string, parsed by app
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@map("platform_settings")
+}
