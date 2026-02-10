@@ -3,17 +3,14 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
-  forwardRef,
-  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, PaymentStatus, TransactionType } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { OpenTailorService } from '../measurements/open-tailor.service';
-import { PaymentsService } from '../payments/payments.service';
 
 @Injectable()
 export class OrdersService {
@@ -21,8 +18,6 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly openTailorService: OpenTailorService,
-    @Inject(forwardRef(() => PaymentsService))
-    private readonly paymentsService: PaymentsService,
   ) {}
 
   async create(userId: string, createOrderDto: CreateOrderDto) {
@@ -526,23 +521,95 @@ export class OrdersService {
       throw new BadRequestException('Order must be delivered to confirm');
     }
 
-    const updatedOrder = await this.updateOrderStatus(
-      order.id,
-      OrderStatus.CONFIRMED,
-      userId,
-      updateDto.note || 'Customer confirmed satisfaction',
-      { confirmedAt: new Date() },
-    );
+    // Update order status and release funds in a transaction
+    return this.prisma.$transaction(async (tx) => {
+      // Update order status
+      const updatedOrder = await tx.order.update({
+        where: { id: order.id },
+        data: {
+          status: OrderStatus.CONFIRMED,
+          confirmedAt: new Date(),
+        },
+        include: {
+          customer: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+          designer: {
+            select: {
+              id: true,
+              userId: true,
+              businessName: true,
+              slug: true,
+            },
+          },
+          design: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+          deliveryAddress: true,
+          payment: true,
+        },
+      });
 
-    // Release funds to designer
-    try {
-      await this.paymentsService.releaseFunds(order.id);
-    } catch (error) {
-      // Log error but don't fail the confirmation
-      console.error('Error releasing funds:', error);
-    }
+      // Create status history
+      await tx.orderStatusHistory.create({
+        data: {
+          orderId: order.id,
+          fromStatus: order.status,
+          toStatus: OrderStatus.CONFIRMED,
+          note: updateDto.note || 'Customer confirmed satisfaction',
+          changedBy: userId,
+        },
+      });
 
-    return updatedOrder;
+      // Release funds
+      if (updatedOrder.payment && updatedOrder.payment.status === PaymentStatus.HELD_IN_ESCROW) {
+        const designerEarnings =
+          Number(updatedOrder.totalPrice) - Number(updatedOrder.platformCommission);
+
+        // Update payment status
+        await tx.payment.update({
+          where: { id: updatedOrder.payment.id },
+          data: {
+            status: PaymentStatus.RELEASED,
+            releasedAt: new Date(),
+          },
+        });
+
+        // Create ESCROW_RELEASE transaction for designer
+        await tx.walletTransaction.create({
+          data: {
+            userId: updatedOrder.designer.userId,
+            paymentId: updatedOrder.payment.id,
+            type: TransactionType.ESCROW_RELEASE,
+            amount: designerEarnings,
+            currency: updatedOrder.currency,
+            description: `Earnings released for order ${updatedOrder.orderNumber}`,
+          },
+        });
+
+        // Create COMMISSION_DEDUCTION transaction (for record keeping)
+        await tx.walletTransaction.create({
+          data: {
+            userId: updatedOrder.designer.userId,
+            paymentId: updatedOrder.payment.id,
+            type: TransactionType.COMMISSION_DEDUCTION,
+            amount: updatedOrder.platformCommission,
+            currency: updatedOrder.currency,
+            description: `Platform commission for order ${updatedOrder.orderNumber}`,
+          },
+        });
+      }
+
+      return updatedOrder;
+    });
   }
 
   // Cancel order (only before accepted)

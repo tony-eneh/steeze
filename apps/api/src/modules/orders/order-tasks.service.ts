@@ -1,17 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
-import { PaymentsService } from '../payments/payments.service';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, PaymentStatus, TransactionType } from '@prisma/client';
 
 @Injectable()
 export class OrderTasksService {
   private readonly logger = new Logger(OrderTasksService.name);
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly paymentsService: PaymentsService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   @Cron(CronExpression.EVERY_HOUR)
   async autoConfirmDeliveredOrders() {
@@ -63,6 +59,14 @@ export class OrderTasksService {
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({
         where: { id: orderId },
+        include: {
+          designer: {
+            include: {
+              user: true,
+            },
+          },
+          payment: true,
+        },
       });
 
       if (!order) {
@@ -70,7 +74,7 @@ export class OrderTasksService {
       }
 
       // Update order status to AUTO_CONFIRMED
-      await tx.order.update({
+      const updatedOrder = await tx.order.update({
         where: { id: orderId },
         data: {
           status: OrderStatus.AUTO_CONFIRMED,
@@ -97,12 +101,45 @@ export class OrderTasksService {
       });
 
       // Release funds to designer
-      try {
-        await this.paymentsService.releaseFunds(orderId);
-      } catch (error) {
-        this.logger.error(`Error releasing funds for order ${orderId}:`, error.message);
-        throw error;
+      if (order.payment && order.payment.status === PaymentStatus.HELD_IN_ESCROW) {
+        const designerEarnings =
+          Number(order.totalPrice) - Number(order.platformCommission);
+
+        // Update payment status
+        await tx.payment.update({
+          where: { id: order.payment.id },
+          data: {
+            status: PaymentStatus.RELEASED,
+            releasedAt: new Date(),
+          },
+        });
+
+        // Create ESCROW_RELEASE transaction for designer
+        await tx.walletTransaction.create({
+          data: {
+            userId: order.designer.userId,
+            paymentId: order.payment.id,
+            type: TransactionType.ESCROW_RELEASE,
+            amount: designerEarnings,
+            currency: order.currency,
+            description: `Earnings released for order ${order.orderNumber}`,
+          },
+        });
+
+        // Create COMMISSION_DEDUCTION transaction (for record keeping)
+        await tx.walletTransaction.create({
+          data: {
+            userId: order.designer.userId,
+            paymentId: order.payment.id,
+            type: TransactionType.COMMISSION_DEDUCTION,
+            amount: order.platformCommission,
+            currency: order.currency,
+            description: `Platform commission for order ${order.orderNumber}`,
+          },
+        });
       }
+
+      return updatedOrder;
     });
   }
 }
