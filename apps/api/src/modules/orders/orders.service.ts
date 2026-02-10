@@ -10,12 +10,14 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { OrderStatus } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
+import { OpenTailorService } from '../measurements/open-tailor.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly openTailorService: OpenTailorService,
   ) {}
 
   async create(userId: string, createOrderDto: CreateOrderDto) {
@@ -108,9 +110,14 @@ export class OrdersService {
     });
     let measurementSnapshot: any = null;
     if (user?.openTailorEmail) {
-      // TODO: Fetch from Open Tailor API
-      // For now, just store the email
-      measurementSnapshot = { email: user.openTailorEmail };
+      try {
+        measurementSnapshot = await this.openTailorService.getMeasurementsByEmail(
+          user.openTailorEmail,
+        );
+      } catch (error) {
+        // If measurements not found, just store the email
+        measurementSnapshot = { email: user.openTailorEmail };
+      }
     }
 
     // Generate order number
