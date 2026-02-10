@@ -251,6 +251,151 @@ The following features are ready to implement in Phase 3:
 
 All the Prisma models and business logic foundations are already in place for these features.
 
+---
+
+## ✅ Phase 3: Payments + Escrow (COMPLETED)
+
+### Implemented Features
+
+#### 1. Payments Module with Paystack Integration
+
+**PaystackService** (`apps/api/src/modules/payments/paystack.service.ts`)
+- Initialize transactions via Paystack API
+- Verify transactions by reference
+- Webhook signature verification (HMAC SHA512)
+- Generate unique payment references
+
+**PaymentsService** (`apps/api/src/modules/payments/payments.service.ts`)
+- Payment initialization with comprehensive order validation
+- Webhook processing for payment events
+- Payment verification
+- Escrow management
+- Automatic fund release
+
+**PaymentsController** (`apps/api/src/modules/payments/payments.controller.ts`)
+- `POST /api/v1/payments/initialize` - Initialize payment for an order
+- `POST /api/v1/payments/webhook` - Handle Paystack webhooks
+- `GET /api/v1/payments/verify/:reference` - Verify payment by reference
+
+#### 2. Escrow Management
+
+**Payment Flow:**
+1. Customer initiates payment → Paystack checkout page
+2. Paystack webhook notifies on success → Order status: PAID
+3. Payment record created with status: HELD_IN_ESCROW
+4. WalletTransaction created: ESCROW_HOLD
+
+**Escrow Hold Process:**
+- Payment amount held when order is paid
+- Creates audit trail in WalletTransaction table
+- Links payment to order for tracking
+
+#### 3. Fund Release Logic
+
+**Manual Confirmation (Customer):**
+- Customer confirms satisfaction after delivery
+- Order status → CONFIRMED
+- Payment status → RELEASED
+- Creates WalletTransaction: ESCROW_RELEASE (designer earnings)
+- Creates WalletTransaction: COMMISSION_DEDUCTION (platform fee)
+
+**Auto-Confirmation (System):**
+- OrderTasksService runs hourly CRON job
+- Finds orders delivered > 2 days ago
+- Auto-confirms and releases funds
+- Order status → AUTO_CONFIRMED
+
+**Fund Release Calculations:**
+```typescript
+designerEarnings = totalPrice - platformCommission
+platformCommission = totalPrice * (commission_percentage / 100)
+```
+
+#### 4. Wallet Transaction Tracking
+
+Complete financial audit trail with transaction types:
+- `ESCROW_HOLD` - Payment received and held
+- `ESCROW_RELEASE` - Funds released to designer
+- `COMMISSION_DEDUCTION` - Platform commission
+- `REFUND` - Payment refunded to customer
+- `RETURN_FEE_DEDUCTION` - Return courier fee charged to designer
+- `WITHDRAWAL` - Designer withdraws earnings
+
+#### 5. Auto-Confirmation CRON Job
+
+**OrderTasksService** (`apps/api/src/modules/orders/order-tasks.service.ts`)
+- Scheduled with `@Cron(CronExpression.EVERY_HOUR)`
+- Queries orders with status DELIVERED
+- Checks if `deliveredAt + 2 days < now()`
+- Auto-confirms orders and releases funds
+- Creates status history for audit trail
+
+**Configuration:**
+- Auto-confirm days configurable via PlatformSetting
+- Default: 2 days from delivery
+
+### API Endpoints (Phase 3)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/v1/payments/initialize` | Initialize payment for an order | Yes (Customer) |
+| POST | `/api/v1/payments/webhook` | Receive Paystack webhook | No (signature verified) |
+| GET | `/api/v1/payments/verify/:reference` | Verify payment status | Yes |
+
+### Technical Implementation Details
+
+**Architecture Decisions:**
+- Avoided circular dependencies between OrdersModule and PaymentsModule
+- Fund release logic integrated directly in OrdersService
+- All financial operations wrapped in database transactions
+- Idempotent payment processing
+
+**Security:**
+- Webhook signature verification prevents spoofing
+- Payment amount validated against order total
+- Order ownership validated before payment initialization
+- Webhook payload validated before processing
+
+**Error Handling:**
+- Failed payments logged but don't block workflow
+- Webhook errors logged and can be replayed
+- Transaction rollback on any failure during fund release
+
+### Configuration
+
+**Environment Variables:**
+```env
+PAYSTACK_SECRET_KEY=sk_test_xxxx
+PAYSTACK_PUBLIC_KEY=pk_test_xxxx
+PAYSTACK_WEBHOOK_SECRET=whsec_xxxx
+PLATFORM_URL=https://steeze.com
+```
+
+**Platform Settings:**
+- `commission_percentage` - Platform commission (default: 10%)
+- `auto_confirm_days` - Days until auto-confirm (default: 2)
+
+### Testing Checklist
+
+- [x] Build compiles without errors
+- [x] No circular dependencies
+- [x] All modules load correctly
+- [x] API server starts successfully
+- [x] Payment endpoints registered
+- [ ] End-to-end payment flow (requires Paystack test keys)
+- [ ] Webhook processing (requires ngrok/public URL)
+- [ ] Fund release on confirmation
+- [ ] Auto-confirmation CRON execution
+- [ ] Wallet transaction creation
+
+### Next Steps (Phase 4)
+
+Phase 4 will implement:
+1. **Returns Module** - Handle return requests and courier dispatch
+2. **Ratings Module** - Bidirectional ratings after transaction completion
+3. **Refund Processing** - Automatic refunds for returns
+4. **Return Fee Deduction** - Charge designer for return courier costs
+
 ## Code Quality
 
 - TypeScript strict mode enabled
