@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { DesignersModule } from './modules/designers/designers.module';
 import { DesignsModule } from './modules/designs/designs.module';
+import { OrdersModule } from './modules/orders/orders.module';
 import { configValidationSchema } from './config/env.validation';
 
 @Module({
@@ -22,6 +23,7 @@ import { configValidationSchema } from './config/env.validation';
     UsersModule,
     DesignersModule,
     DesignsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
