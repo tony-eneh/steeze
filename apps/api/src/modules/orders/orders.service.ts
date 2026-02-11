@@ -65,9 +65,13 @@ export class OrdersService {
     const validAddOnIds: string[] = [];
     if (createOrderDto.addOnIds && createOrderDto.addOnIds.length > 0) {
       for (const addOnSelection of createOrderDto.addOnIds) {
-        const addOn = design.addOns.find((a) => a.id === addOnSelection.addOnId);
+        const addOn = design.addOns.find(
+          (a) => a.id === addOnSelection.addOnId,
+        );
         if (!addOn || !addOn.isAvailable) {
-          throw new BadRequestException(`Invalid add-on: ${addOnSelection.addOnId}`);
+          throw new BadRequestException(
+            `Invalid add-on: ${addOnSelection.addOnId}`,
+          );
         }
         addOnsTotal += Number(addOn.price);
         validAddOnIds.push(addOn.id);
@@ -111,9 +115,10 @@ export class OrdersService {
     let measurementSnapshot: any = null;
     if (user?.openTailorEmail) {
       try {
-        measurementSnapshot = await this.openTailorService.getMeasurementsByEmail(
-          user.openTailorEmail,
-        );
+        measurementSnapshot =
+          await this.openTailorService.getMeasurementsByEmail(
+            user.openTailorEmail,
+          );
       } catch (error) {
         // If measurements not found, just store the email
         measurementSnapshot = { email: user.openTailorEmail };
@@ -198,7 +203,7 @@ export class OrdersService {
     const { page = 1, limit = 20 } = paginationDto;
     const skip = (page - 1) * limit;
 
-    let where: any = {};
+    const where: any = {};
 
     if (userRole === 'CUSTOMER') {
       where.customerId = userId;
@@ -498,7 +503,9 @@ export class OrdersService {
     // Set auto-confirm deadline (2 days from delivery)
     const autoConfirmDays = await this.getAutoConfirmDays();
     const autoConfirmDeadline = new Date();
-    autoConfirmDeadline.setDate(autoConfirmDeadline.getDate() + autoConfirmDays);
+    autoConfirmDeadline.setDate(
+      autoConfirmDeadline.getDate() + autoConfirmDays,
+    );
 
     return this.updateOrderStatus(
       order.id,
@@ -570,9 +577,13 @@ export class OrdersService {
       });
 
       // Release funds
-      if (updatedOrder.payment && updatedOrder.payment.status === PaymentStatus.HELD_IN_ESCROW) {
+      if (
+        updatedOrder.payment &&
+        updatedOrder.payment.status === PaymentStatus.HELD_IN_ESCROW
+      ) {
         const designerEarnings =
-          Number(updatedOrder.totalPrice) - Number(updatedOrder.platformCommission);
+          Number(updatedOrder.totalPrice) -
+          Number(updatedOrder.platformCommission);
 
         // Update payment status
         await tx.payment.update({

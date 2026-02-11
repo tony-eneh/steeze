@@ -49,10 +49,7 @@ export class DesignersService {
             },
           },
         },
-        orderBy: [
-          { averageRating: 'desc' },
-          { totalCompletedOrders: 'desc' },
-        ],
+        orderBy: [{ averageRating: 'desc' }, { totalCompletedOrders: 'desc' }],
       }),
       this.prisma.designerProfile.count({ where }),
     ]);
@@ -166,7 +163,7 @@ export class DesignersService {
     let slug: string | undefined;
     if (updateDto.businessName) {
       slug = this.generateSlug(updateDto.businessName);
-      
+
       // Check if slug already exists
       const existingSlug = await this.prisma.designerProfile.findUnique({
         where: { slug },
@@ -200,7 +197,11 @@ export class DesignersService {
     return designer;
   }
 
-  async getMyOrders(userId: string, paginationDto: PaginationDto, status?: string) {
+  async getMyOrders(
+    userId: string,
+    paginationDto: PaginationDto,
+    status?: string,
+  ) {
     const { page = 1, limit = 20 } = paginationDto;
     const skip = (page - 1) * limit;
 
@@ -281,7 +282,11 @@ export class DesignersService {
       where: {
         userId,
         type: {
-          in: ['ESCROW_RELEASE', 'COMMISSION_DEDUCTION', 'RETURN_FEE_DEDUCTION'],
+          in: [
+            'ESCROW_RELEASE',
+            'COMMISSION_DEDUCTION',
+            'RETURN_FEE_DEDUCTION',
+          ],
         },
       },
       _sum: {
@@ -307,7 +312,17 @@ export class DesignersService {
     const pendingOrders = await this.prisma.order.findMany({
       where: {
         designerId: user.designerProfile.id,
-        status: { in: ['DELIVERED', 'PAID', 'ACCEPTED', 'IN_PROGRESS', 'READY_FOR_PICKUP', 'PICKED_UP', 'IN_TRANSIT'] },
+        status: {
+          in: [
+            'DELIVERED',
+            'PAID',
+            'ACCEPTED',
+            'IN_PROGRESS',
+            'READY_FOR_PICKUP',
+            'PICKED_UP',
+            'IN_TRANSIT',
+          ],
+        },
       },
       select: {
         totalPrice: true,

@@ -101,7 +101,10 @@ export class OrderTasksService {
       });
 
       // Release funds to designer
-      if (order.payment && order.payment.status === PaymentStatus.HELD_IN_ESCROW) {
+      if (
+        order.payment &&
+        order.payment.status === PaymentStatus.HELD_IN_ESCROW
+      ) {
         const designerEarnings =
           Number(order.totalPrice) - Number(order.platformCommission);
 

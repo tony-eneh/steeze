@@ -19,7 +19,10 @@ export class PaymentsService {
     private readonly paystackService: PaystackService,
   ) {}
 
-  async initializePayment(userId: string, initializePaymentDto: InitializePaymentDto) {
+  async initializePayment(
+    userId: string,
+    initializePaymentDto: InitializePaymentDto,
+  ) {
     const { orderId } = initializePaymentDto;
 
     // Get order with customer details
@@ -37,7 +40,9 @@ export class PaymentsService {
 
     // Verify the user owns this order
     if (order.customerId !== userId) {
-      throw new BadRequestException('You do not have permission to pay for this order');
+      throw new BadRequestException(
+        'You do not have permission to pay for this order',
+      );
     }
 
     // Check if order is in correct status
@@ -55,11 +60,14 @@ export class PaymentsService {
         if (reference) {
           // Try to get existing payment URL from Paystack
           try {
-            const verification = await this.paystackService.verifyTransaction(reference);
+            const verification =
+              await this.paystackService.verifyTransaction(reference);
             if (verification.data.status === 'success') {
               // Payment was actually successful, update our records
               await this.handleSuccessfulPayment(order.id, reference);
-              throw new BadRequestException('This order has already been paid for');
+              throw new BadRequestException(
+                'This order has already been paid for',
+              );
             }
           } catch (error) {
             // If verification fails, payment likely expired, create new one
@@ -112,7 +120,10 @@ export class PaymentsService {
 
   async handleWebhook(signature: string, payload: string) {
     // Verify webhook signature
-    const isValid = this.paystackService.verifyWebhookSignature(payload, signature);
+    const isValid = this.paystackService.verifyWebhookSignature(
+      payload,
+      signature,
+    );
     if (!isValid) {
       this.logger.warn('Invalid webhook signature');
       throw new BadRequestException('Invalid signature');
@@ -143,7 +154,8 @@ export class PaymentsService {
 
   async verifyPayment(reference: string) {
     // Verify with Paystack
-    const verification = await this.paystackService.verifyTransaction(reference);
+    const verification =
+      await this.paystackService.verifyTransaction(reference);
 
     // Get payment record
     const payment = await this.prisma.payment.findFirst({
@@ -260,7 +272,8 @@ export class PaymentsService {
       }
 
       // Calculate designer earnings (total - commission)
-      const designerEarnings = Number(order.totalPrice) - Number(order.platformCommission);
+      const designerEarnings =
+        Number(order.totalPrice) - Number(order.platformCommission);
 
       // Update payment status
       await tx.payment.update({

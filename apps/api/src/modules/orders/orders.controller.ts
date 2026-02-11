@@ -137,7 +137,11 @@ export class OrdersController {
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
-    const order = await this.ordersService.markInProgress(user.sub, id, updateDto);
+    const order = await this.ordersService.markInProgress(
+      user.sub,
+      id,
+      updateDto,
+    );
     return {
       success: true,
       data: order,
@@ -170,7 +174,10 @@ export class OrdersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Mark order as picked up (admin only)' })
   @ApiResponse({ status: 200, description: 'Order marked as picked up' })
-  async markPickedUp(@Param('id') id: string, @Body() updateDto: UpdateOrderStatusDto) {
+  async markPickedUp(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateOrderStatusDto,
+  ) {
     const order = await this.ordersService.markPickedUp(id, updateDto);
     return {
       success: true,
@@ -185,7 +192,10 @@ export class OrdersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Mark order as in transit (admin only)' })
   @ApiResponse({ status: 200, description: 'Order marked as in transit' })
-  async markInTransit(@Param('id') id: string, @Body() updateDto: UpdateOrderStatusDto) {
+  async markInTransit(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateOrderStatusDto,
+  ) {
     const order = await this.ordersService.markInTransit(id, updateDto);
     return {
       success: true,
@@ -200,7 +210,10 @@ export class OrdersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Mark order as delivered (admin only)' })
   @ApiResponse({ status: 200, description: 'Order marked as delivered' })
-  async markDelivered(@Param('id') id: string, @Body() updateDto: UpdateOrderStatusDto) {
+  async markDelivered(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateOrderStatusDto,
+  ) {
     const order = await this.ordersService.markDelivered(id, updateDto);
     return {
       success: true,
@@ -220,7 +233,11 @@ export class OrdersController {
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
-    const order = await this.ordersService.confirmOrder(user.sub, id, updateDto);
+    const order = await this.ordersService.confirmOrder(
+      user.sub,
+      id,
+      updateDto,
+    );
     return {
       success: true,
       data: order,

@@ -412,3 +412,207 @@ Full interactive API documentation is available at `/api/docs` when the API is r
 - Request/response schemas
 - Authentication requirements
 - Example requests
+
+---
+
+## ✅ Phase 4: Returns + Ratings (COMPLETED)
+
+### Implemented Features
+
+#### 1. Returns Module
+
+**ReturnsService** (`apps/api/src/modules/returns/returns.service.ts`)
+- Customer return request creation (within 2 days of delivery)
+- Admin return request approval/rejection
+- Return courier dispatch tracking
+- Complete return processing with refund and fee deduction
+- Comprehensive validation and authorization checks
+
+**ReturnsController** (`apps/api/src/modules/returns/returns.controller.ts`)
+- `POST /api/v1/returns/orders/:orderId/return` - Customer request return
+- `GET /api/v1/returns` - List all return requests (admin)
+- `GET /api/v1/returns/:id` - Get return request details (admin)
+- `PATCH /api/v1/returns/:id/approve` - Approve return (admin)
+- `PATCH /api/v1/returns/:id/reject` - Reject return (admin)
+- `PATCH /api/v1/returns/:id/pickup-dispatched` - Mark courier dispatched (admin)
+- `PATCH /api/v1/returns/:id/returned` - Complete return (admin)
+
+#### 2. Return Request Lifecycle
+
+**Return Flow:**
+```
+DELIVERED → RETURN_REQUESTED → RETURN_PICKUP → RETURN_IN_TRANSIT → RETURNED
+```
+
+**Business Rules:**
+1. Customers can request returns within 2 days of delivery
+2. Return requests start in PENDING status
+3. Admin can approve or reject return requests
+4. Approved returns trigger courier dispatch for pickup
+5. Completed returns trigger full refund to customer
+6. Return courier fee is deducted from designer's balance
+
+**Return Fee Deduction:**
+- Return courier fee retrieved from `PlatformSetting` (key: `return_courier_fee`)
+- Default: NGN 2,500 if not configured
+- Deducted from designer via `RETURN_FEE_DEDUCTION` wallet transaction
+- Customer receives full refund via `REFUND` wallet transaction
+
+#### 3. Ratings Module
+
+**RatingsService** (`apps/api/src/modules/ratings/ratings.service.ts`)
+- Bidirectional rating creation (customer ↔ designer)
+- Rating validation (only after order confirmation)
+- Designer average rating calculation
+- Rating statistics and distribution
+- Comprehensive ownership and authorization checks
+
+**RatingsController** (`apps/api/src/modules/ratings/ratings.controller.ts`)
+- `POST /api/v1/ratings/orders/:orderId/rate` - Rate the other party
+- `GET /api/v1/ratings/users/:userId` - Get ratings received by user
+- `GET /api/v1/ratings/orders/:orderId` - Get ratings for an order
+- `GET /api/v1/ratings/designers/:designerProfileId/stats` - Get rating statistics
+
+#### 4. Bidirectional Rating System
+
+**Rating Flow:**
+- Both customer and designer can rate each other after order is CONFIRMED or AUTO_CONFIRMED
+- Each party can submit one rating per order
+- Ratings include score (1-5) and optional comment (max 500 chars)
+- Designer's average rating is automatically updated when they receive new ratings
+
+**Rating Constraints:**
+- `@@unique([orderId, raterId])` - One rating per user per order
+- Only after order status: CONFIRMED or AUTO_CONFIRMED
+- Rater must be part of the order (customer or designer)
+- Automatic validation prevents duplicate ratings
+
+#### 5. Designer Average Rating
+
+**Calculation:**
+```typescript
+totalScore = sum of all rating scores
+averageRating = totalScore / totalRatings
+// Stored rounded to 2 decimal places
+```
+
+**Updates:**
+- Recalculated whenever designer receives a new rating
+- Stored in `DesignerProfile.averageRating`
+- Used for displaying designer reputation
+- Available via rating statistics endpoint
+
+### API Endpoints (Phase 4)
+
+#### Returns Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/v1/returns/orders/:orderId/return` | Request return (2-day window) | Customer only |
+| GET | `/api/v1/returns` | List return requests | Admin only |
+| GET | `/api/v1/returns/:id` | Get return details | Admin only |
+| PATCH | `/api/v1/returns/:id/approve` | Approve return | Admin only |
+| PATCH | `/api/v1/returns/:id/reject` | Reject return | Admin only |
+| PATCH | `/api/v1/returns/:id/pickup-dispatched` | Mark courier dispatched | Admin only |
+| PATCH | `/api/v1/returns/:id/returned` | Complete return with refund | Admin only |
+
+#### Ratings Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/v1/ratings/orders/:orderId/rate` | Rate the other party | Customer or Designer |
+| GET | `/api/v1/ratings/users/:userId` | Get user's ratings | Authenticated |
+| GET | `/api/v1/ratings/orders/:orderId` | Get order ratings | Order participant |
+| GET | `/api/v1/ratings/designers/:designerProfileId/stats` | Get rating stats | Authenticated |
+
+### Technical Implementation Details
+
+**Transaction Safety:**
+- All return operations wrapped in database transactions
+- Return fee deduction and customer refund atomic
+- Status history tracking for audit trail
+- Order status transitions validated
+
+**Date Validation:**
+- Uses `date-fns` library for date calculations
+- 2-day return window validated with `subDays()` function
+- Delivery timestamp required for return requests
+
+**Authorization:**
+- Returns: Customer can only request for own orders
+- Ratings: Users can only rate orders they're part of
+- Admin-only operations properly guarded
+- Order ownership validated before any operation
+
+**Error Handling:**
+- Comprehensive validation with descriptive error messages
+- Status validation prevents invalid state transitions
+- Ownership checks prevent unauthorized access
+- Duplicate rating prevention with unique constraint
+
+### Configuration
+
+**Platform Settings:**
+- `return_courier_fee` - Flat fee for return courier (default: 2500 NGN)
+- Used in `ReturnsService.markReturned()` method
+
+**Dependencies:**
+- `date-fns` - Date manipulation and validation library
+- Added to `apps/api/package.json`
+
+### Database Schema Usage
+
+**Models:**
+- `ReturnRequest` - Return request lifecycle tracking
+- `Rating` - Bidirectional ratings storage
+- `OrderStatusHistory` - Status change audit trail
+- `WalletTransaction` - Financial transaction tracking
+- `PlatformSetting` - Configurable platform values
+
+**Enums:**
+- `OrderStatus` - Includes return states (RETURN_REQUESTED, RETURN_PICKUP, etc.)
+- `TransactionType` - Includes REFUND and RETURN_FEE_DEDUCTION
+- `PaymentStatus` - Includes REFUNDED status
+
+### Testing Checklist
+
+- [x] Build compiles without errors
+- [x] No circular dependencies
+- [x] All modules load correctly
+- [x] API server starts successfully
+- [x] Return endpoints registered
+- [x] Rating endpoints registered
+- [ ] End-to-end return flow (requires running DB)
+- [ ] End-to-end rating flow (requires running DB)
+- [ ] Return 2-day window validation
+- [ ] Refund processing verification
+- [ ] Designer average rating calculation
+- [ ] Duplicate rating prevention
+
+### Next Steps (Phase 5+)
+
+Future phases can implement:
+1. **Notifications Module** - Notify users of returns, ratings, etc.
+2. **Admin Dashboard** - UI for managing returns and viewing ratings
+3. **Mobile App** - Customer/designer interfaces for returns and ratings
+4. **Email Notifications** - Automated emails for return status updates
+5. **Push Notifications** - Real-time updates for ratings received
+
+## Code Quality
+
+- TypeScript strict mode enabled
+- ESLint + Prettier configured
+- Modular architecture with clear separation of concerns
+- DTOs for all request/response validation
+- Services contain business logic, controllers are thin
+- Proper error handling and logging
+- Comprehensive validation and authorization
+
+## API Documentation
+
+Full interactive API documentation is available at `/api/docs` when the API is running. It includes:
+- All endpoints with descriptions
+- Request/response schemas
+- Authentication requirements
+- Example requests
+- **New:** Returns and Ratings endpoints with full documentation

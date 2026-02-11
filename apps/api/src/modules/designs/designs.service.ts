@@ -279,7 +279,11 @@ export class DesignsService {
   }
 
   // Add-ons
-  async addAddOn(userId: string, designId: string, createAddOnDto: CreateAddOnDto) {
+  async addAddOn(
+    userId: string,
+    designId: string,
+    createAddOnDto: CreateAddOnDto,
+  ) {
     await this.checkOwnership(userId, designId);
 
     const addOn = await this.prisma.designAddOn.create({
