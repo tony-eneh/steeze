@@ -11,6 +11,8 @@ import { DesignsModule } from './modules/designs/designs.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { MeasurementsModule } from './modules/measurements/measurements.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { ReturnsModule } from './modules/returns/returns.module';
+import { RatingsModule } from './modules/ratings/ratings.module';
 import { configValidationSchema } from './config/env.validation';
 
 @Module({
@@ -28,6 +30,8 @@ import { configValidationSchema } from './config/env.validation';
     OrdersModule,
     MeasurementsModule,
     PaymentsModule,
+    ReturnsModule,
+    RatingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
