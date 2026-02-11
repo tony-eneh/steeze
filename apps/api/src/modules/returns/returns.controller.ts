@@ -35,7 +35,8 @@ export class ReturnsController {
   @Roles(UserRole.CUSTOMER)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Request return for an order (customer only, within 2 days of delivery)',
+    summary:
+      'Request return for an order (customer only, within 2 days of delivery)',
   })
   @ApiResponse({ status: 201, description: 'Return request created' })
   async createReturnRequest(
@@ -141,7 +142,9 @@ export class ReturnsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Mark courier dispatched for return pickup (admin only)' })
+  @ApiOperation({
+    summary: 'Mark courier dispatched for return pickup (admin only)',
+  })
   @ApiResponse({ status: 200, description: 'Courier dispatch recorded' })
   async markPickupDispatched(
     @CurrentUser() user: any,
@@ -165,7 +168,8 @@ export class ReturnsController {
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Complete return - refund customer and deduct fee from designer (admin only)',
+    summary:
+      'Complete return - refund customer and deduct fee from designer (admin only)',
   })
   @ApiResponse({ status: 200, description: 'Return completed' })
   async markReturned(

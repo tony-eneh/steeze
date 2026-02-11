@@ -12,7 +12,6 @@ import {
   OrderStatus,
   PaymentStatus,
   TransactionType,
-  UserRole,
 } from '@prisma/client';
 import { subDays } from 'date-fns';
 
@@ -49,17 +48,23 @@ export class ReturnsService {
 
     // Check if user is the customer
     if (order.customerId !== userId) {
-      throw new ForbiddenException('You can only request returns for your own orders');
+      throw new ForbiddenException(
+        'You can only request returns for your own orders',
+      );
     }
 
     // Validate order status is DELIVERED
     if (order.status !== OrderStatus.DELIVERED) {
-      throw new BadRequestException('Returns can only be requested for delivered orders');
+      throw new BadRequestException(
+        'Returns can only be requested for delivered orders',
+      );
     }
 
     // Check if return already exists
     if (order.returnRequest) {
-      throw new BadRequestException('A return request already exists for this order');
+      throw new BadRequestException(
+        'A return request already exists for this order',
+      );
     }
 
     // Validate within 2-day window
@@ -230,7 +235,9 @@ export class ReturnsService {
     const returnRequest = await this.findOne(id);
 
     if (returnRequest.status !== 'PENDING') {
-      throw new BadRequestException('Only pending return requests can be approved');
+      throw new BadRequestException(
+        'Only pending return requests can be approved',
+      );
     }
 
     const result = await this.prisma.$transaction(async (tx) => {
@@ -257,7 +264,9 @@ export class ReturnsService {
     const returnRequest = await this.findOne(id);
 
     if (returnRequest.status !== 'PENDING') {
-      throw new BadRequestException('Only pending return requests can be rejected');
+      throw new BadRequestException(
+        'Only pending return requests can be rejected',
+      );
     }
 
     const result = await this.prisma.$transaction(async (tx) => {
@@ -308,7 +317,9 @@ export class ReturnsService {
     const returnRequest = await this.findOne(id);
 
     if (returnRequest.status !== 'APPROVED') {
-      throw new BadRequestException('Only approved return requests can be marked as dispatched');
+      throw new BadRequestException(
+        'Only approved return requests can be marked as dispatched',
+      );
     }
 
     const result = await this.prisma.$transaction(async (tx) => {
@@ -354,7 +365,9 @@ export class ReturnsService {
     const returnRequest = await this.findOne(id);
 
     if (returnRequest.status !== 'PICKUP_DISPATCHED') {
-      throw new BadRequestException('Return must be in PICKUP_DISPATCHED status to complete');
+      throw new BadRequestException(
+        'Return must be in PICKUP_DISPATCHED status to complete',
+      );
     }
 
     // Get return courier fee from platform settings

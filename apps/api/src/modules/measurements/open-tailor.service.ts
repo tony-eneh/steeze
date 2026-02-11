@@ -27,13 +27,20 @@ export class OpenTailorService {
         }),
       );
 
-      if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
+      if (
+        response?.data &&
+        Array.isArray(response.data) &&
+        response.data.length > 0
+      ) {
         return response.data[0];
       }
 
       return null;
     } catch (error: any) {
-      this.logger.error(`Failed to fetch measurements for ${email}`, error.message);
+      this.logger.error(
+        `Failed to fetch measurements for ${email}`,
+        error.message,
+      );
       throw new BadRequestException(
         'Failed to fetch measurements from Open Tailor',
       );

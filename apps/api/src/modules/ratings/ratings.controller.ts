@@ -29,7 +29,8 @@ export class RatingsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Rate the other party on an order (customer rates designer, designer rates customer)',
+    summary:
+      'Rate the other party on an order (customer rates designer, designer rates customer)',
   })
   @ApiResponse({ status: 201, description: 'Rating created' })
   async createRating(
@@ -99,9 +100,8 @@ export class RatingsController {
   async getDesignerRatingStats(
     @Param('designerProfileId') designerProfileId: string,
   ) {
-    const stats = await this.ratingsService.getDesignerRatingStats(
-      designerProfileId,
-    );
+    const stats =
+      await this.ratingsService.getDesignerRatingStats(designerProfileId);
     return {
       success: true,
       data: stats,

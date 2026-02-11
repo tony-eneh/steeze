@@ -90,9 +90,8 @@ export class MeasurementsService {
     }
 
     // Create measurement in Open Tailor
-    const measurement = await this.openTailorService.createMeasurement(
-      createDto,
-    );
+    const measurement =
+      await this.openTailorService.createMeasurement(createDto);
 
     // Link the email to user's profile if not already linked
     if (!user.openTailorEmail) {

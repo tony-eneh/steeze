@@ -207,7 +207,11 @@ export class DesignsController {
     @Param('id') id: string,
     @Body() createAddOnDto: CreateAddOnDto,
   ) {
-    const addOn = await this.designsService.addAddOn(user.sub, id, createAddOnDto);
+    const addOn = await this.designsService.addAddOn(
+      user.sub,
+      id,
+      createAddOnDto,
+    );
     return {
       success: true,
       data: addOn,

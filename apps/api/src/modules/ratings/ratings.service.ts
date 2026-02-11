@@ -16,11 +16,7 @@ export class RatingsService {
   /**
    * Create a rating for an order (bidirectional - customer rates designer, designer rates customer)
    */
-  async createRating(
-    userId: string,
-    orderId: string,
-    dto: CreateRatingDto,
-  ) {
+  async createRating(userId: string, orderId: string, dto: CreateRatingDto) {
     // Find order and validate
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
@@ -111,10 +107,7 @@ export class RatingsService {
   /**
    * Get ratings received by a user
    */
-  async getRatingsForUser(
-    userId: string,
-    paginationDto: PaginationDto,
-  ) {
+  async getRatingsForUser(userId: string, paginationDto: PaginationDto) {
     const { page = 1, limit = 20 } = paginationDto;
     const skip = (page - 1) * limit;
 

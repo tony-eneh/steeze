@@ -38,8 +38,10 @@ export class PaystackService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.secretKey = this.configService.get<string>('PAYSTACK_SECRET_KEY') || '';
-    this.webhookSecret = this.configService.get<string>('PAYSTACK_WEBHOOK_SECRET') || '';
+    this.secretKey =
+      this.configService.get<string>('PAYSTACK_SECRET_KEY') || '';
+    this.webhookSecret =
+      this.configService.get<string>('PAYSTACK_WEBHOOK_SECRET') || '';
   }
 
   async initializeTransaction(
@@ -57,7 +59,9 @@ export class PaystackService {
             amount: Math.round(amount * 100), // Convert to kobo
             reference,
             metadata,
-            callback_url: this.configService.get<string>('PLATFORM_URL') + '/payment/callback',
+            callback_url:
+              this.configService.get<string>('PLATFORM_URL') +
+              '/payment/callback',
           },
           {
             headers: {
@@ -75,7 +79,9 @@ export class PaystackService {
     }
   }
 
-  async verifyTransaction(reference: string): Promise<VerifyTransactionResponse> {
+  async verifyTransaction(
+    reference: string,
+  ): Promise<VerifyTransactionResponse> {
     try {
       const response = await firstValueFrom(
         this.httpService.get<VerifyTransactionResponse>(
