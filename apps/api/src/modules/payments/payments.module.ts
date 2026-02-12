@@ -4,9 +4,10 @@ import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 import { PaystackService } from './paystack.service';
 import { PrismaModule } from '../prisma/prisma.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [HttpModule, PrismaModule],
+  imports: [HttpModule, PrismaModule, NotificationsModule],
   controllers: [PaymentsController],
   providers: [PaymentsService, PaystackService],
   exports: [PaymentsService],

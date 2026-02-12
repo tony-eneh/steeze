@@ -13,6 +13,7 @@ import { MeasurementsModule } from './modules/measurements/measurements.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ReturnsModule } from './modules/returns/returns.module';
 import { RatingsModule } from './modules/ratings/ratings.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { configValidationSchema } from './config/env.validation';
 
 @Module({
@@ -32,6 +33,7 @@ import { configValidationSchema } from './config/env.validation';
     PaymentsModule,
     ReturnsModule,
     RatingsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

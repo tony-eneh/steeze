@@ -8,10 +8,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateRatingDto } from './dto/create-rating.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { OrderStatus } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class RatingsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   /**
    * Create a rating for an order (bidirectional - customer rates designer, designer rates customer)
@@ -99,6 +103,20 @@ export class RatingsService {
     // If ratee is a designer, update their average rating
     if (rateeId === order.designer.userId) {
       await this.updateDesignerAverageRating(order.designer.id);
+    }
+
+    // Send notification to the person being rated
+    try {
+      const raterName = `${rating.rater.firstName} ${rating.rater.lastName}`;
+      await this.notificationsService.notifyRatingReceived(
+        rateeId,
+        orderId,
+        order.orderNumber,
+        dto.score,
+        raterName,
+      );
+    } catch (error) {
+      console.error('Failed to send rating notification:', error);
     }
 
     return rating;

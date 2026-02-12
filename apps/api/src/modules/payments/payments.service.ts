@@ -9,6 +9,7 @@ import { PaystackService } from './paystack.service';
 import { InitializePaymentDto } from './dto/initialize-payment.dto';
 import { PaystackWebhookDto } from './dto/paystack-webhook.dto';
 import { OrderStatus, PaymentStatus, TransactionType } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PaymentsService {
@@ -17,6 +18,7 @@ export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly paystackService: PaystackService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async initializePayment(
@@ -184,7 +186,7 @@ export class PaymentsService {
   }
 
   private async handleSuccessfulPayment(orderId: string, reference: string) {
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // Get order
       const order = await tx.order.findUnique({
         where: { id: orderId },
@@ -238,12 +240,47 @@ export class PaymentsService {
 
       this.logger.log(`Payment successful for order ${order.orderNumber}`);
 
-      return payment;
+      return { payment, orderId };
     });
+
+    // Send notification after successful payment (outside transaction)
+    try {
+      const order = await this.prisma.order.findUnique({
+        where: { id: result.orderId },
+        include: {
+          customer: true,
+          designer: { include: { user: true } },
+        },
+      });
+      
+      if (order) {
+        // Notify customer
+        await this.notificationsService.notifyPaymentUpdate(
+          order.customer.id,
+          order.id,
+          order.orderNumber,
+          'success',
+          Number(order.totalPrice),
+        );
+
+        // Notify designer
+        await this.notificationsService.notifyPaymentUpdate(
+          order.designer.userId,
+          order.id,
+          order.orderNumber,
+          'success',
+          Number(order.totalPrice),
+        );
+      }
+    } catch (error) {
+      this.logger.error('Failed to send payment notification:', error);
+    }
+
+    return result.payment;
   }
 
   async releaseFunds(orderId: string) {
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // Get order with payment
       const order = await tx.order.findUnique({
         where: { id: orderId },
@@ -314,10 +351,33 @@ export class PaymentsService {
 
       return {
         orderId: order.id,
+        orderNumber: order.orderNumber,
         totalAmount: order.totalPrice,
         designerEarnings,
         platformCommission: order.platformCommission,
+        designerUserId: order.designer.userId,
+        customerId: order.customerId,
       };
     });
+
+    // Send notification after fund release (outside transaction)
+    try {
+      await this.notificationsService.notifyPaymentUpdate(
+        result.designerUserId,
+        result.orderId,
+        result.orderNumber,
+        'released',
+        Number(result.designerEarnings),
+      );
+    } catch (error) {
+      this.logger.error('Failed to send fund release notification:', error);
+    }
+
+    return {
+      orderId: result.orderId,
+      totalAmount: result.totalAmount,
+      designerEarnings: result.designerEarnings,
+      platformCommission: result.platformCommission,
+    };
   }
 }

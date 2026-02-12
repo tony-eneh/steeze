@@ -14,10 +14,14 @@ import {
   TransactionType,
 } from '@prisma/client';
 import { subDays } from 'date-fns';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ReturnsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   /**
    * Customer requests a return within 2 days of delivery
@@ -111,6 +115,39 @@ export class ReturnsService {
 
       return returnRequest;
     });
+
+    // Send notifications after return request is created
+    try {
+      const order = await this.prisma.order.findUnique({
+        where: { id: orderId },
+        include: {
+          customer: true,
+          designer: { include: { user: true } },
+        },
+      });
+
+      if (order) {
+        // Notify customer
+        await this.notificationsService.notifyReturnUpdate(
+          order.customer.id,
+          orderId,
+          order.orderNumber,
+          'PENDING',
+          'Your return request has been submitted and is under review.',
+        );
+
+        // Notify designer
+        await this.notificationsService.notifyReturnUpdate(
+          order.designer.userId,
+          orderId,
+          order.orderNumber,
+          'PENDING',
+          `A return has been requested for order ${order.orderNumber}.`,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send return notification:', error);
+    }
 
     return result;
   }

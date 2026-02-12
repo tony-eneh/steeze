@@ -11,6 +11,7 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 import { OrderStatus, PaymentStatus, TransactionType } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { OpenTailorService } from '../measurements/open-tailor.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class OrdersService {
@@ -18,6 +19,7 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly openTailorService: OpenTailorService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(userId: string, createOrderDto: CreateOrderDto) {
@@ -694,6 +696,7 @@ export class OrdersService {
             select: {
               id: true,
               businessName: true,
+              userId: true,
             },
           },
           design: {
@@ -717,6 +720,34 @@ export class OrdersService {
 
       return updatedOrder;
     });
+
+    // Send notifications after transaction succeeds
+    try {
+      // Notify customer about order status change
+      await this.notificationsService.notifyOrderUpdate(
+        order.customer.id,
+        order.id,
+        order.orderNumber,
+        newStatus,
+      );
+
+      // Notify designer about order status change (for customer-initiated actions)
+      if (
+        newStatus === OrderStatus.CONFIRMED ||
+        newStatus === OrderStatus.RETURN_REQUESTED ||
+        newStatus === OrderStatus.CANCELLED
+      ) {
+        await this.notificationsService.notifyOrderUpdate(
+          order.designer.userId,
+          order.id,
+          order.orderNumber,
+          newStatus,
+        );
+      }
+    } catch (error) {
+      // Log notification errors but don't fail the order update
+      console.error('Failed to send notification:', error);
+    }
 
     return order;
   }
