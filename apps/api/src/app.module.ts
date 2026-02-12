@@ -14,6 +14,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { ReturnsModule } from './modules/returns/returns.module';
 import { RatingsModule } from './modules/ratings/ratings.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { configValidationSchema } from './config/env.validation';
 
 @Module({
@@ -34,6 +35,7 @@ import { configValidationSchema } from './config/env.validation';
     ReturnsModule,
     RatingsModule,
     NotificationsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

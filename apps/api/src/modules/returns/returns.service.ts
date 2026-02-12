@@ -291,6 +291,39 @@ export class ReturnsService {
       return updated;
     });
 
+    // Send notifications after approval
+    try {
+      const order = await this.prisma.order.findUnique({
+        where: { id: returnRequest.orderId },
+        include: {
+          customer: true,
+          designer: { include: { user: true } },
+        },
+      });
+
+      if (order) {
+        // Notify customer
+        await this.notificationsService.notifyReturnUpdate(
+          order.customer.id,
+          order.id,
+          order.orderNumber,
+          'APPROVED',
+          'Your return request has been approved. A courier will be dispatched to pick up the item.',
+        );
+
+        // Notify designer
+        await this.notificationsService.notifyReturnUpdate(
+          order.designer.userId,
+          order.id,
+          order.orderNumber,
+          'APPROVED',
+          `Return request for order ${order.orderNumber} has been approved.`,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send return approval notification:', error);
+    }
+
     return result;
   }
 
@@ -339,6 +372,29 @@ export class ReturnsService {
 
       return updated;
     });
+
+    // Send notifications after rejection
+    try {
+      const order = await this.prisma.order.findUnique({
+        where: { id: returnRequest.orderId },
+        include: {
+          customer: true,
+        },
+      });
+
+      if (order) {
+        // Notify customer
+        await this.notificationsService.notifyReturnUpdate(
+          order.customer.id,
+          order.id,
+          order.orderNumber,
+          'REJECTED',
+          `Your return request has been rejected. ${dto.adminNotes || ''}`,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send return rejection notification:', error);
+    }
 
     return result;
   }
