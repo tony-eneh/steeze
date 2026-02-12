@@ -1,29 +1,15 @@
-@use '@angular/material' as mat;
+/* Import Angular Material prebuilt theme */
+@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
 
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-@include mat.core();
-
-$primary: mat.define-palette(mat.$deep-orange-palette, 600);
-$accent: mat.define-palette(mat.$teal-palette, 600);
-$warn: mat.define-palette(mat.$red-palette, 600);
-
-$theme: mat.define-light-theme(
-	(
-		color: (
-			primary: $primary,
-			accent: $accent,
-			warn: $warn
-		),
-		typography: mat.define-typography-config(
-			$font-family: 'Space Grotesk, Instrument Sans, Segoe UI, sans-serif'
-		)
-	)
-);
-
-@include mat.all-component-themes($theme);
-
+/* Custom theme color overrides using CSS variables */
 :root {
+	/* Material theme color overrides */
+	--mat-app-background-color: #f8f4f0;
+	--mat-app-text-color: #1b1613;
+	
+	/* Custom brand colors */
 	--surface: #f8f4f0;
 	--ink-strong: #1b1613;
 	--accent-strong: #f26b3a;
