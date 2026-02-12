@@ -1,0 +1,33 @@
+<div class="page-header">
+  <div>
+    <h2>Settings</h2>
+    <p class="muted">Tune fees and platform rules.</p>
+  </div>
+</div>
+
+<div class="loading" *ngIf="isLoading">
+  <mat-spinner diameter="28"></mat-spinner>
+</div>
+
+<mat-card class="panel" *ngIf="!isLoading">
+  <form [formGroup]="form">
+    <div class="fields">
+      <mat-form-field appearance="outline">
+        <mat-label>Commission Percentage</mat-label>
+        <input matInput formControlName="commission_percentage" type="number" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Return Courier Fee</mat-label>
+        <input matInput formControlName="return_courier_fee" type="number" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Auto-confirm Days</mat-label>
+        <input matInput formControlName="auto_confirm_days" type="number" />
+      </mat-form-field>
+    </div>
+
+    <button mat-raised-button color="primary" (click)="save()">Save settings</button>
+  </form>
+</mat-card>

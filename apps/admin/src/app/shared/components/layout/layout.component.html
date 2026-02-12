@@ -1,0 +1,17 @@
+<mat-sidenav-container class="layout" autosize>
+  <mat-sidenav
+    #drawer
+    class="side"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    [opened]="!(isHandset$ | async)"
+  >
+    <app-sidebar></app-sidebar>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content">
+    <app-header></app-header>
+    <main class="page">
+      <router-outlet></router-outlet>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

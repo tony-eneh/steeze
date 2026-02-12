@@ -10,7 +10,10 @@
     "test": "turbo run test",
     "db:generate": "turbo run db:generate --filter=api",
     "db:migrate": "turbo run db:migrate --filter=api",
-    "db:seed": "turbo run db:seed --filter=api"
+    "db:seed": "turbo run db:seed --filter=api",
+    "admin:dev": "pnpm --filter admin dev",
+    "admin:build": "pnpm --filter admin build",
+    "admin:serve": "pnpm --filter admin serve"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",

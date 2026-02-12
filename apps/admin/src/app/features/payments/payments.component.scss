@@ -1,0 +1,31 @@
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  margin: 0;
+}
+
+.muted {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.note {
+  padding: 1.25rem;
+  border-radius: 18px;
+  background: rgba(255, 246, 232, 0.9);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}

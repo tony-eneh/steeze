@@ -1,0 +1,21 @@
+<div class="page-header">
+  <div>
+    <h2>Payments</h2>
+    <p class="muted">Escrow and release overview.</p>
+  </div>
+</div>
+
+<div class="loading" *ngIf="isLoading">
+  <mat-spinner diameter="28"></mat-spinner>
+</div>
+
+<section class="stats" *ngIf="!isLoading && overview">
+  <app-stat-card title="Total Escrow" [value]="overview.totalEscrow | currency : 'NGN' : 'symbol' : '1.0-0'"></app-stat-card>
+  <app-stat-card title="Released" [value]="overview.totalReleased | currency : 'NGN' : 'symbol' : '1.0-0'"></app-stat-card>
+  <app-stat-card title="Refunded" [value]="overview.totalRefunded | currency : 'NGN' : 'symbol' : '1.0-0'"></app-stat-card>
+  <app-stat-card title="Pending Releases" [value]="overview.pendingReleaseCount"></app-stat-card>
+</section>
+
+<mat-card class="note">
+  Full payment transaction lists are not exposed yet. This panel reflects the admin overview endpoint.
+</mat-card>

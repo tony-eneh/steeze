@@ -1,0 +1,52 @@
+@use '@angular/material' as mat;
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@include mat.core();
+
+$primary: mat.define-palette(mat.$deep-orange-palette, 600);
+$accent: mat.define-palette(mat.$teal-palette, 600);
+$warn: mat.define-palette(mat.$red-palette, 600);
+
+$theme: mat.define-light-theme(
+	(
+		color: (
+			primary: $primary,
+			accent: $accent,
+			warn: $warn
+		),
+		typography: mat.define-typography-config(
+			$font-family: 'Space Grotesk, Instrument Sans, Segoe UI, sans-serif'
+		)
+	)
+);
+
+@include mat.all-component-themes($theme);
+
+:root {
+	--surface: #f8f4f0;
+	--ink-strong: #1b1613;
+	--accent-strong: #f26b3a;
+	--accent-deep: #0f4946;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: 'Space Grotesk', 'Instrument Sans', 'Segoe UI', sans-serif;
+	background: var(--surface);
+	color: var(--ink-strong);
+}
+
+h1,
+h2,
+h3 {
+	font-family: 'Space Grotesk', 'Instrument Sans', 'Segoe UI', sans-serif;
+}
+
+mat-card {
+	border-radius: 20px;
+}

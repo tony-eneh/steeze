@@ -1,0 +1,30 @@
+<div class="login">
+  <div class="hero">
+    <div class="badge">Admin Console</div>
+    <h1>Steeze Operations</h1>
+    <p>Monitor the marketplace, respond to returns, and keep escrow flowing.</p>
+  </div>
+
+  <mat-card class="card">
+    <h2>Sign in</h2>
+    <p class="subtitle">Use your admin credentials to continue.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" />
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="isLoading">
+        <mat-icon>lock_open</mat-icon>
+        <span *ngIf="!isLoading">Sign in</span>
+        <mat-spinner *ngIf="isLoading" diameter="18"></mat-spinner>
+      </button>
+    </form>
+  </mat-card>
+</div>

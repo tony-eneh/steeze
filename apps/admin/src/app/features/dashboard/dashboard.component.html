@@ -1,0 +1,58 @@
+<div class="dashboard">
+  <div class="header">
+    <div>
+      <h2>Dashboard</h2>
+      <p class="muted">Marketplace pulse at a glance.</p>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="isLoading">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!isLoading && stats">
+    <section class="stats">
+      <app-stat-card title="Total Users" [value]="stats.totalUsers"></app-stat-card>
+      <app-stat-card title="Designers" [value]="stats.totalDesigners"></app-stat-card>
+      <app-stat-card title="Orders" [value]="stats.totalOrders"></app-stat-card>
+      <app-stat-card title="Revenue" [value]="stats.totalRevenue | currency : 'NGN' : 'symbol' : '1.0-0'"></app-stat-card>
+      <app-stat-card title="Pending Orders" [value]="stats.pendingOrders"></app-stat-card>
+      <app-stat-card title="Completed" [value]="stats.completedOrders"></app-stat-card>
+    </section>
+
+    <section class="grid">
+      <mat-card class="panel">
+        <div class="panel-header">
+          <h3>Orders by Status</h3>
+          <span class="muted">Live distribution</span>
+        </div>
+        <canvas baseChart [data]="barChartData" [options]="barChartOptions" chartType="bar"></canvas>
+      </mat-card>
+
+      <mat-card class="panel" *ngIf="payments">
+        <div class="panel-header">
+          <h3>Escrow Overview</h3>
+          <span class="muted">Funds in motion</span>
+        </div>
+        <div class="payment-grid">
+          <div>
+            <p class="label">Total Escrow</p>
+            <p class="value">{{ payments.totalEscrow | currency : 'NGN' : 'symbol' : '1.0-0' }}</p>
+          </div>
+          <div>
+            <p class="label">Released</p>
+            <p class="value">{{ payments.totalReleased | currency : 'NGN' : 'symbol' : '1.0-0' }}</p>
+          </div>
+          <div>
+            <p class="label">Refunded</p>
+            <p class="value">{{ payments.totalRefunded | currency : 'NGN' : 'symbol' : '1.0-0' }}</p>
+          </div>
+          <div>
+            <p class="label">Pending Releases</p>
+            <p class="value">{{ payments.pendingReleaseCount }}</p>
+          </div>
+        </div>
+      </mat-card>
+    </section>
+  </ng-container>
+</div>

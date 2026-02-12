@@ -1,0 +1,62 @@
+<div class="page-header">
+  <div>
+    <h2>Orders</h2>
+    <p class="muted">Track orders across the marketplace.</p>
+  </div>
+  <mat-form-field appearance="outline">
+    <mat-label>Status</mat-label>
+    <mat-select [formControl]="statusControl">
+      <mat-option value="">All</mat-option>
+      <mat-option value="PENDING_PAYMENT">Pending Payment</mat-option>
+      <mat-option value="PAID">Paid</mat-option>
+      <mat-option value="ACCEPTED">Accepted</mat-option>
+      <mat-option value="IN_PROGRESS">In Progress</mat-option>
+      <mat-option value="READY_FOR_PICKUP">Ready for Pickup</mat-option>
+      <mat-option value="DELIVERED">Delivered</mat-option>
+      <mat-option value="CONFIRMED">Confirmed</mat-option>
+      <mat-option value="RETURN_REQUESTED">Return Requested</mat-option>
+      <mat-option value="RETURNED">Returned</mat-option>
+      <mat-option value="CANCELLED">Cancelled</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="loading" *ngIf="isLoading">
+  <mat-spinner diameter="28"></mat-spinner>
+</div>
+
+<table mat-table [dataSource]="orders" class="table" *ngIf="!isLoading">
+  <ng-container matColumnDef="orderNumber">
+    <th mat-header-cell *matHeaderCellDef>Order</th>
+    <td mat-cell *matCellDef="let order">{{ order.orderNumber }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="customer">
+    <th mat-header-cell *matHeaderCellDef>Customer</th>
+    <td mat-cell *matCellDef="let order">
+      {{ order.customer.firstName }} {{ order.customer.lastName }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="designer">
+    <th mat-header-cell *matHeaderCellDef>Designer</th>
+    <td mat-cell *matCellDef="let order">{{ order.designer.businessName }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="status">
+    <th mat-header-cell *matHeaderCellDef>Status</th>
+    <td mat-cell *matCellDef="let order">
+      <mat-chip color="primary" selected>{{ order.status }}</mat-chip>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="total">
+    <th mat-header-cell *matHeaderCellDef>Total</th>
+    <td mat-cell *matCellDef="let order">
+      {{ order.totalPrice | currency : 'NGN' : 'symbol' : '1.0-0' }}
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>

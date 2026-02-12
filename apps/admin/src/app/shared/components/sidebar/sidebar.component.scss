@@ -1,0 +1,53 @@
+.sidebar {
+  height: 100%;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.5);
+  margin-bottom: 0.75rem;
+}
+
+mat-nav-list a {
+  border-radius: 12px;
+  margin-bottom: 0.5rem;
+  transition: background 0.2s ease;
+}
+
+mat-nav-list a.active {
+  background: rgba(255, 118, 72, 0.15);
+  font-weight: 600;
+}
+
+mat-nav-list a mat-icon {
+  margin-right: 0.75rem;
+  color: var(--accent-strong);
+}
+
+.info {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.chips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.chip {
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(15, 73, 70, 0.08);
+  color: var(--accent-deep);
+  font-weight: 500;
+  font-size: 0.85rem;
+}

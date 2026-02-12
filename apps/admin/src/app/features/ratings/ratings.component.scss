@@ -1,0 +1,60 @@
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  margin: 0;
+}
+
+.muted {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.panel {
+  padding: 2rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.ratings {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.rating {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.score {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--accent-strong);
+}
+
+.comment {
+  margin: 0;
+  font-weight: 500;
+}
+
+.meta {
+  margin: 0.25rem 0 0;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}

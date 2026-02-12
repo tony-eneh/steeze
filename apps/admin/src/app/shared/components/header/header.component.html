@@ -1,0 +1,19 @@
+<mat-toolbar class="header" color="primary">
+  <div class="brand">
+    <span class="brand-mark">St</span>
+    <div class="brand-text">
+      <span class="title">Steeze Admin</span>
+      <span class="subtitle">Operations Console</span>
+    </div>
+  </div>
+
+  <span class="spacer"></span>
+
+  <div class="user" *ngIf="user$ | async as user">
+    <span class="name">{{ user.firstName }} {{ user.lastName }}</span>
+    <button mat-stroked-button color="accent" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Sign out
+    </button>
+  </div>
+</mat-toolbar>

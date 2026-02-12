@@ -1,0 +1,30 @@
+<div class="page-header">
+  <div>
+    <h2>Ratings</h2>
+    <p class="muted">Look up ratings received by a user.</p>
+  </div>
+</div>
+
+<mat-card class="panel">
+  <div class="search">
+    <mat-form-field appearance="outline">
+      <mat-label>User ID</mat-label>
+      <input matInput [formControl]="userIdControl" placeholder="Paste user id" />
+    </mat-form-field>
+    <button mat-raised-button color="primary" (click)="fetchRatings()">Search</button>
+  </div>
+
+  <div class="loading" *ngIf="isLoading">
+    <mat-spinner diameter="24"></mat-spinner>
+  </div>
+
+  <div class="ratings" *ngIf="!isLoading">
+    <div class="rating" *ngFor="let rating of ratings">
+      <div class="score">{{ rating.score }} ★</div>
+      <div>
+        <p class="comment">{{ rating.comment || 'No comment' }}</p>
+        <p class="meta">Rater: {{ rating.raterId }} · {{ rating.createdAt | date }}</p>
+      </div>
+    </div>
+  </div>
+</mat-card>

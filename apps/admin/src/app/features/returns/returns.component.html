@@ -1,0 +1,55 @@
+<div class="page-header">
+  <div>
+    <h2>Returns</h2>
+    <p class="muted">Review and resolve return requests.</p>
+  </div>
+  <mat-form-field appearance="outline">
+    <mat-label>Status</mat-label>
+    <mat-select [formControl]="statusControl">
+      <mat-option value="">All</mat-option>
+      <mat-option value="PENDING">Pending</mat-option>
+      <mat-option value="APPROVED">Approved</mat-option>
+      <mat-option value="REJECTED">Rejected</mat-option>
+      <mat-option value="PICKUP_DISPATCHED">Pickup Dispatched</mat-option>
+      <mat-option value="RETURNED">Returned</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="loading" *ngIf="isLoading">
+  <mat-spinner diameter="28"></mat-spinner>
+</div>
+
+<table mat-table [dataSource]="returns" class="table" *ngIf="!isLoading">
+  <ng-container matColumnDef="order">
+    <th mat-header-cell *matHeaderCellDef>Order</th>
+    <td mat-cell *matCellDef="let request">{{ request.order.orderNumber }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="customer">
+    <th mat-header-cell *matHeaderCellDef>Customer</th>
+    <td mat-cell *matCellDef="let request">
+      {{ request.customer.firstName }} {{ request.customer.lastName }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="status">
+    <th mat-header-cell *matHeaderCellDef>Status</th>
+    <td mat-cell *matCellDef="let request">
+      <mat-chip color="primary" selected>{{ request.status }}</mat-chip>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <td mat-cell *matCellDef="let request" class="actions">
+      <button mat-stroked-button color="primary" (click)="updateStatus(request, 'approve')">Approve</button>
+      <button mat-stroked-button color="warn" (click)="updateStatus(request, 'reject')">Reject</button>
+      <button mat-stroked-button color="accent" (click)="updateStatus(request, 'pickup-dispatched')">Dispatch</button>
+      <button mat-flat-button color="primary" (click)="updateStatus(request, 'returned')">Returned</button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+</table>
