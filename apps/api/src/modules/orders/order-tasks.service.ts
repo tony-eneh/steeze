@@ -2,12 +2,16 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrderStatus, PaymentStatus, TransactionType } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class OrderTasksService {
   private readonly logger = new Logger(OrderTasksService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
   async autoConfirmDeliveredOrders() {
@@ -39,12 +43,39 @@ export class OrderTasksService {
       // Process each order
       for (const order of ordersToConfirm) {
         try {
-          await this.autoConfirmOrder(order.id);
+          const result = await this.autoConfirmOrder(order.id);
+
+          await this.notificationsService.notifyOrderUpdate(
+            result.customerId,
+            result.orderId,
+            result.orderNumber,
+            OrderStatus.AUTO_CONFIRMED,
+          );
+
+          await this.notificationsService.notifyOrderUpdate(
+            result.designerUserId,
+            result.orderId,
+            result.orderNumber,
+            OrderStatus.AUTO_CONFIRMED,
+          );
+
+          if (result.releasedAmount !== null) {
+            await this.notificationsService.notifyPaymentUpdate(
+              result.designerUserId,
+              result.orderId,
+              result.orderNumber,
+              'released',
+              result.releasedAmount,
+            );
+          }
+
           this.logger.log(`Auto-confirmed order ${order.orderNumber}`);
         } catch (error) {
+          const message =
+            error instanceof Error ? error.message : 'Unknown error';
           this.logger.error(
             `Failed to auto-confirm order ${order.orderNumber}:`,
-            error.message,
+            message,
           );
         }
       }
@@ -100,6 +131,8 @@ export class OrderTasksService {
         },
       });
 
+      let releasedAmount: number | null = null;
+
       // Release funds to designer
       if (
         order.payment &&
@@ -107,6 +140,7 @@ export class OrderTasksService {
       ) {
         const designerEarnings =
           Number(order.totalPrice) - Number(order.platformCommission);
+        releasedAmount = designerEarnings;
 
         // Update payment status
         await tx.payment.update({
@@ -142,7 +176,13 @@ export class OrderTasksService {
         });
       }
 
-      return updatedOrder;
+      return {
+        orderId: updatedOrder.id,
+        orderNumber: updatedOrder.orderNumber,
+        customerId: order.customerId,
+        designerUserId: order.designer.userId,
+        releasedAmount,
+      };
     });
   }
 }

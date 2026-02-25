@@ -531,7 +531,9 @@ export class OrdersService {
     }
 
     // Update order status and release funds in a transaction
-    return this.prisma.$transaction(async (tx) => {
+    let releasedAmount: number | null = null;
+
+    const updatedOrder = await this.prisma.$transaction(async (tx) => {
       // Update order status
       const updatedOrder = await tx.order.update({
         where: { id: order.id },
@@ -586,6 +588,7 @@ export class OrdersService {
         const designerEarnings =
           Number(updatedOrder.totalPrice) -
           Number(updatedOrder.platformCommission);
+        releasedAmount = designerEarnings;
 
         // Update payment status
         await tx.payment.update({
@@ -623,6 +626,36 @@ export class OrdersService {
 
       return updatedOrder;
     });
+
+    try {
+      await this.notificationsService.notifyOrderUpdate(
+        updatedOrder.customer.id,
+        updatedOrder.id,
+        updatedOrder.orderNumber,
+        OrderStatus.CONFIRMED,
+      );
+
+      await this.notificationsService.notifyOrderUpdate(
+        updatedOrder.designer.userId,
+        updatedOrder.id,
+        updatedOrder.orderNumber,
+        OrderStatus.CONFIRMED,
+      );
+
+      if (releasedAmount !== null) {
+        await this.notificationsService.notifyPaymentUpdate(
+          updatedOrder.designer.userId,
+          updatedOrder.id,
+          updatedOrder.orderNumber,
+          'released',
+          releasedAmount,
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send confirmation notifications:', error);
+    }
+
+    return updatedOrder;
   }
 
   // Cancel order (only before accepted)
