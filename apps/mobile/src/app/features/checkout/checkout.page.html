@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Checkout</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Order summary</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Classic Gown · Maison Atelier</p>
+      <p>Base price: NGN 45,000</p>
+      <p>Fabric: +NGN 5,000</p>
+      <p>Delivery: NGN 2,500</p>
+      <p class="total">Total: NGN 52,500</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Delivery address</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-radio-group [(ngModel)]="selectedAddress">
+        <ion-item>
+          <ion-label>Home · Lekki, Lagos</ion-label>
+          <ion-radio slot="end" value="home"></ion-radio>
+        </ion-item>
+        <ion-item>
+          <ion-label>Office · Victoria Island</ion-label>
+          <ion-radio slot="end" value="office"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
+      <ion-button fill="clear" routerLink="/addresses">Manage addresses</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Measurements</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Linked to Open Tailor · Last updated 2 weeks ago
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button class="primary" expand="block" (click)="proceedToPayment()">
+    Pay now
+  </ion-button>
+</ion-content>

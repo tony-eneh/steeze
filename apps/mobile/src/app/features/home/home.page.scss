@@ -1,0 +1,33 @@
+.hero {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #f7f4ef 0%, #f1e6d2 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.hero h1 {
+  font-size: 1.6rem;
+  margin: 0 0 6px;
+}
+
+.hero p {
+  margin: 0;
+  color: #4b4b4b;
+}
+
+.design-card {
+  margin: 12px 8px;
+}
+
+.design-image {
+  height: 120px;
+  background: linear-gradient(120deg, #e8ddc7 0%, #d7c4a3 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+.feature-card {
+  margin: 16px;
+}

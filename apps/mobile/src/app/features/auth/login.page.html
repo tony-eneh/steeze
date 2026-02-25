@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Welcome back</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="auth-card">
+    <h2>Sign in</h2>
+    <p class="subtitle">Access your orders and saved designs.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+        <mat-error *ngIf="form.controls.email.invalid"
+          >Enter a valid email.</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" />
+        <mat-error *ngIf="form.controls.password.invalid"
+          >Password is required.</mat-error
+        >
+      </mat-form-field>
+
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <button mat-flat-button color="primary" class="full-width" type="submit">
+        {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
+      </button>
+    </form>
+
+    <div class="links">
+      <a routerLink="/auth/forgot-password">Forgot password?</a>
+      <a routerLink="/auth/register">Create account</a>
+    </div>
+  </div>
+</ion-content>

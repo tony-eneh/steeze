@@ -1,0 +1,84 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Order detail</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading order...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ng-container *ngIf="order">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ order.orderNumber }}</ion-card-title>
+        <ion-card-subtitle>{{ order.status }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>{{ order.design.title }} · {{ order.design.designerName }}</p>
+        <p>Total: {{ order.totalPrice | number: '1.0-0' }} {{ order.currency }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-list>
+      <ion-item>
+        <ion-label>
+          <h3>Delivery address</h3>
+          <p>{{ order.deliveryAddress }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-label>
+          <h3>Special instructions</h3>
+          <p>{{ order.specialInstructions || 'None' }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Status timeline</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let entry of order.timeline">
+            <ion-label>
+              <h3>{{ entry.status }}</h3>
+              <p>{{ entry.note || 'Update logged' }}</p>
+            </ion-label>
+            <ion-note slot="end">{{ entry.createdAt | date }}</ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="actions">
+      <ion-button class="primary" expand="block" (click)="confirmOrder()">
+        Confirm delivery
+      </ion-button>
+      <ion-button fill="clear" [routerLink]="['/orders', order.id, 'rate']">
+        Rate this order
+      </ion-button>
+    </div>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Request return</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-textarea
+          placeholder="Reason for return"
+          [(ngModel)]="returnReason"
+        ></ion-textarea>
+        <ion-button class="secondary" expand="block" (click)="requestReturn()">
+          Submit return
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+</ion-content>

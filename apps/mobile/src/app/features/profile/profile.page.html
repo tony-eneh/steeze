@@ -1,0 +1,53 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Profile</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Welcome back</ion-card-title>
+      <ion-card-subtitle>Customer account</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Update your profile, measurements, and saved addresses.</p>
+      <button mat-flat-button color="primary" routerLink="/profile/settings">
+        Edit profile
+      </button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-list>
+    <ion-item routerLink="/profile/settings">
+      <ion-label>Profile settings</ion-label>
+    </ion-item>
+    <ion-item routerLink="/addresses">
+      <ion-label>Addresses</ion-label>
+    </ion-item>
+    <ion-item routerLink="/measurements">
+      <ion-label>Measurements</ion-label>
+    </ion-item>
+    <ion-item routerLink="/wallet">
+      <ion-label>Wallet</ion-label>
+    </ion-item>
+    <ion-item routerLink="/ratings">
+      <ion-label>Ratings</ion-label>
+    </ion-item>
+    <ion-item routerLink="/returns">
+      <ion-label>Returns</ion-label>
+    </ion-item>
+    <ion-item routerLink="/notifications">
+      <ion-label>Notifications</ion-label>
+    </ion-item>
+    <ion-item routerLink="/designer/dashboard">
+      <ion-label>Designer dashboard</ion-label>
+    </ion-item>
+  </ion-list>
+
+  <div class="logout">
+    <button mat-stroked-button color="warn" (click)="logout()">
+      Sign out
+    </button>
+  </div>
+</ion-content>

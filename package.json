@@ -11,9 +11,15 @@
     "db:generate": "turbo run db:generate --filter=api",
     "db:migrate": "turbo run db:migrate --filter=api",
     "db:seed": "turbo run db:seed --filter=api",
+    "api:dev": "pnpm --filter api dev",
     "admin:dev": "pnpm --filter admin dev",
     "admin:build": "pnpm --filter admin build",
-    "admin:serve": "pnpm --filter admin serve"
+    "admin:serve": "pnpm --filter admin serve",
+    "mobile:dev": "pnpm --filter mobile dev",
+    "mobile:build": "pnpm --filter mobile build",
+    "mobile:serve": "pnpm --filter mobile start",
+    "landing:dev": "pnpm --filter landing dev",
+    "landing:build": "pnpm --filter landing build"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",

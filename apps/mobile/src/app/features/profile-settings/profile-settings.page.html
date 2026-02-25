@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Profile settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Account</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="stacked">First name</ion-label>
+        <ion-input [(ngModel)]="firstName"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Last name</ion-label>
+        <ion-input [(ngModel)]="lastName"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Phone</ion-label>
+        <ion-input [(ngModel)]="phone"></ion-input>
+      </ion-item>
+      <ion-button class="primary" expand="block">Save changes</ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

@@ -1,0 +1,29 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Measurements</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Link Open Tailor</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="stacked">Open Tailor email</ion-label>
+        <ion-input [(ngModel)]="openTailorEmail" type="email"></ion-input>
+      </ion-item>
+      <ion-button class="primary" expand="block">Save link</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Measurement summary</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Measurements will appear here after syncing with Open Tailor.
+    </ion-card-content>
+  </ion-card>
+</ion-content>

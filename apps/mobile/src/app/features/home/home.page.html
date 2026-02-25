@@ -1,0 +1,56 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Steeze</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <section class="hero">
+    <div>
+      <h1>Bespoke fashion, streamlined.</h1>
+      <p>Track orders, chat with designers, and manage measurements in one app.</p>
+    </div>
+    <ion-chip color="secondary">New drops weekly</ion-chip>
+  </section>
+
+  <app-section-header
+    title="Trending designs"
+    subtitle="Fresh looks from verified designers."
+    linkLabel="Explore"
+    linkUrl="/tabs/explore"
+  ></app-section-header>
+
+  <ion-grid *ngIf="!isLoading && designs.length">
+    <ion-row>
+      <ion-col size="6" *ngFor="let design of designs">
+        <ion-card class="design-card" [routerLink]="['/designs', design.id]">
+          <div class="design-image"></div>
+          <ion-card-header>
+            <ion-card-title>{{ design.title }}</ion-card-title>
+            <ion-card-subtitle>{{ design.designerName }}</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            {{ design.basePrice | number: '1.0-0' }} {{ design.currency }}
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading latest designs...</ion-card-content>
+  </ion-card>
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ion-card class="feature-card">
+    <ion-card-header>
+      <ion-card-title>Featured designers</ion-card-title>
+      <ion-card-subtitle>Crafted in Lagos, Abuja, and beyond</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      Follow designers to get notified when they publish new looks.
+    </ion-card-content>
+  </ion-card>
+</ion-content>

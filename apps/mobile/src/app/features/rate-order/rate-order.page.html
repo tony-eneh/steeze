@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Rate order</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>How was your experience?</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-range min="1" max="5" step="1" [(ngModel)]="score"></ion-range>
+      <p class="score">Score: {{ score }} / 5</p>
+      <ion-item>
+        <ion-label position="stacked">Comment</ion-label>
+        <ion-textarea [(ngModel)]="comment"></ion-textarea>
+      </ion-item>
+      <ion-button class="primary" expand="block">Submit rating</ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

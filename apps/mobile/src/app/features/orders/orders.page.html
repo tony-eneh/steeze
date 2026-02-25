@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Orders</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list *ngIf="!isLoading && orders.length">
+    <ion-item *ngFor="let order of orders" [routerLink]="['/orders', order.id]">
+      <ion-label>
+        <h2>{{ order.orderNumber }}</h2>
+        <p>{{ order.design.title }} · {{ order.design.designerName }}</p>
+        <p>Status: {{ order.status }}</p>
+      </ion-label>
+      <app-status-pill label="View" tone="warning"></app-status-pill>
+    </ion-item>
+  </ion-list>
+
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading your orders...</ion-card-content>
+  </ion-card>
+
+  <app-empty-state
+    *ngIf="!isLoading && !orders.length"
+    title="No orders yet"
+    message="Start exploring designs to place your first order."
+  ></app-empty-state>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+</ion-content>

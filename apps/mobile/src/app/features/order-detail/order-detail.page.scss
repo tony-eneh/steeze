@@ -1,0 +1,16 @@
+.actions {
+  margin: 16px 0;
+}
+
+ion-button.primary {
+  --background: var(--ion-color-primary);
+  --color: #ffffff;
+  --border-radius: 12px;
+}
+
+ion-button.secondary {
+  --background: #f0b429;
+  --color: #1f1f1f;
+  --border-radius: 12px;
+  margin-top: 12px;
+}

@@ -1,0 +1,57 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Design</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading design...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ng-container *ngIf="design">
+    <div class="hero-image"></div>
+    <h2>{{ design.title }}</h2>
+    <p class="subtitle">{{ design.designerName }}</p>
+
+    <p>{{ design.description }}</p>
+
+    <div class="price">
+      {{ design.basePrice | number: '1.0-0' }} {{ design.currency }}
+    </div>
+
+    <ion-list>
+      <ion-item>
+        <ion-label>
+          <h3>Fabric options</h3>
+          <p>Select a fabric from the available list.</p>
+        </ion-label>
+      </ion-item>
+      <ion-item *ngFor="let option of design.fabricOptions">
+        <ion-label>{{ option.name }}</ion-label>
+        <ion-note slot="end">+{{ option.priceAdjustment }}</ion-note>
+      </ion-item>
+    </ion-list>
+
+    <ion-list>
+      <ion-item>
+        <ion-label>
+          <h3>Add-ons</h3>
+          <p>Optional finishing touches.</p>
+        </ion-label>
+      </ion-item>
+      <ion-item *ngFor="let addOn of design.addOns">
+        <ion-label>{{ addOn.name }}</ion-label>
+        <ion-note slot="end">+{{ addOn.price }}</ion-note>
+      </ion-item>
+    </ion-list>
+
+    <ion-button class="cta" expand="block" routerLink="/checkout">
+      Start order
+    </ion-button>
+  </ng-container>
+</ion-content>

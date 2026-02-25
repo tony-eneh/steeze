@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Returns</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Request a return</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="stacked">Order number</ion-label>
+        <ion-input [(ngModel)]="orderNumber"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Reason</ion-label>
+        <ion-textarea [(ngModel)]="reason"></ion-textarea>
+      </ion-item>
+      <ion-button class="primary" expand="block">Submit return</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Return status</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Approved return requests and courier updates will show here.
+    </ion-card-content>
+  </ion-card>
+</ion-content>

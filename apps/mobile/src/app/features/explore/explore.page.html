@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Explore</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="search-block ion-padding">
+    <ion-searchbar [(ngModel)]="search" placeholder="Search designs or designers">
+    </ion-searchbar>
+    <div class="filters">
+      <ion-select [(ngModel)]="category" placeholder="Category">
+        <ion-select-option value="gown">Gown</ion-select-option>
+        <ion-select-option value="agbada">Agbada</ion-select-option>
+        <ion-select-option value="suit">Suit</ion-select-option>
+      </ion-select>
+      <ion-select [(ngModel)]="gender" placeholder="Gender">
+        <ion-select-option value="male">Male</ion-select-option>
+        <ion-select-option value="female">Female</ion-select-option>
+        <ion-select-option value="unisex">Unisex</ion-select-option>
+      </ion-select>
+    </div>
+  </div>
+
+  <ion-list>
+    <ion-item lines="none">
+      <ion-label>
+        <h2>Curated collections</h2>
+        <p>Seasonal drops and trending looks.</p>
+      </ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>
+        <h3>Classic Ankara</h3>
+        <p>Bold prints and vibrant colorways.</p>
+      </ion-label>
+      <ion-badge color="secondary">New</ion-badge>
+    </ion-item>
+    <ion-item>
+      <ion-label>
+        <h3>Modern Bridal</h3>
+        <p>Luxury fabrics for memorable ceremonies.</p>
+      </ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-label>
+        <h3>Everyday Essentials</h3>
+        <p>Workwear and casual staples.</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

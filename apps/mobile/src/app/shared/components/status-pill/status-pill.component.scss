@@ -1,0 +1,17 @@
+.pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: #e7e1d6;
+  color: #3b3b3b;
+}
+
+.pill.success {
+  background: #d6f2e3;
+  color: #1f6f3f;
+}
+
+.pill.warning {
+  background: #fff1c4;
+  color: #7d5b00;
+}

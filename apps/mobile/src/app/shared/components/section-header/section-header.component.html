@@ -1,0 +1,7 @@
+<div class="section-header">
+  <div>
+    <h2>{{ title }}</h2>
+    <p *ngIf="subtitle">{{ subtitle }}</p>
+  </div>
+  <a *ngIf="linkLabel && linkUrl" [routerLink]="linkUrl">{{ linkLabel }}</a>
+</div>

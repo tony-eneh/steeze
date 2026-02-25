@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Create account</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="auth-card">
+    <h2>Join Steeze</h2>
+    <p class="subtitle">Set up your profile in minutes.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="grid">
+        <mat-form-field appearance="outline">
+          <mat-label>First name</mat-label>
+          <input matInput formControlName="firstName" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Last name</mat-label>
+          <input matInput formControlName="lastName" />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Account type</mat-label>
+        <mat-select formControlName="role">
+          <mat-option value="CUSTOMER">Customer</mat-option>
+          <mat-option value="DESIGNER">Designer</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="designer-block" *ngIf="form.value.role === 'DESIGNER'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Business name</mat-label>
+          <input matInput formControlName="businessName" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Shop address</mat-label>
+          <input matInput formControlName="shopAddress" />
+        </mat-form-field>
+        <div class="grid">
+          <mat-form-field appearance="outline">
+            <mat-label>City</mat-label>
+            <input matInput formControlName="shopCity" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>State</mat-label>
+            <input matInput formControlName="shopState" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <button mat-flat-button color="primary" class="full-width" type="submit">
+        {{ isSubmitting ? 'Creating...' : 'Create account' }}
+      </button>
+    </form>
+
+    <div class="links">
+      <a routerLink="/auth/login">Already have an account?</a>
+    </div>
+  </div>
+</ion-content>

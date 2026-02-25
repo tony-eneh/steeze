@@ -1,0 +1,24 @@
+.hero-image {
+  height: 200px;
+  border-radius: 18px;
+  background: linear-gradient(120deg, #e8ddc7 0%, #d7c4a3 100%);
+  margin-bottom: 16px;
+}
+
+.subtitle {
+  color: #5b5b5b;
+  margin-top: -4px;
+}
+
+.price {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 16px 0;
+}
+
+ion-button.cta {
+  margin-top: 16px;
+  --background: var(--ion-color-primary);
+  --color: #ffffff;
+  --border-radius: 12px;
+}

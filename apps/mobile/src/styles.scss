@@ -1,0 +1,63 @@
+@use "@angular/material" as mat;
+
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+@import "@ionic/angular/css/display.css";
+
+$mobile-primary: mat.define-palette(mat.$indigo-palette);
+$mobile-accent: mat.define-palette(mat.$blue-grey-palette, A200, A100, A400);
+$mobile-warn: mat.define-palette(mat.$red-palette);
+
+$mobile-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $mobile-primary,
+      accent: $mobile-accent,
+      warn: $mobile-warn
+    ),
+    typography: mat.define-typography-config(),
+    density: 0
+  )
+);
+
+@include mat.core();
+@include mat.all-component-themes($mobile-theme);
+
+:root {
+  --ion-font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --ion-color-primary: #1b4b66;
+  --ion-color-primary-rgb: 27, 75, 102;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #184258;
+  --ion-color-primary-tint: #325b74;
+
+  --ion-color-secondary: #f0b429;
+  --ion-color-secondary-rgb: 240, 180, 41;
+  --ion-color-secondary-contrast: #1f1f1f;
+  --ion-color-secondary-contrast-rgb: 31, 31, 31;
+  --ion-color-secondary-shade: #d3a024;
+  --ion-color-secondary-tint: #f2bc3f;
+
+  --ion-background-color: #f7f4ef;
+  --ion-text-color: #1f1f1f;
+}
+
+h1,
+h2,
+h3,
+ion-title {
+  font-family: 'Playfair Display', 'Space Grotesk', serif;
+}
+
+ion-content {
+  --background: var(--ion-background-color);
+}

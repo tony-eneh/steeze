@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Design editor</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Design details</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="stacked">Title</ion-label>
+        <ion-input [(ngModel)]="title"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Description</ion-label>
+        <ion-textarea [(ngModel)]="description"></ion-textarea>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Base price</ion-label>
+        <ion-input [(ngModel)]="basePrice" type="number"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Category</ion-label>
+        <ion-input [(ngModel)]="category"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Estimated days</ion-label>
+        <ion-input [(ngModel)]="estimatedDays" type="number"></ion-input>
+      </ion-item>
+      <ion-button class="primary" expand="block">Save design</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Images & options</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      Add fabric options, add-ons, and size pricing here.
+    </ion-card-content>
+  </ion-card>
+</ion-content>
