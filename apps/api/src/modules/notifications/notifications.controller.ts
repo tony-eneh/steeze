@@ -26,7 +26,9 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get user notifications with filters and pagination' })
+  @ApiOperation({
+    summary: 'Get user notifications with filters and pagination',
+  })
   @ApiResponse({
     status: 200,
     description: 'Returns paginated list of notifications',

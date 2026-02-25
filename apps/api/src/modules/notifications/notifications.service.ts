@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { NotificationType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateNotificationDto, ListNotificationsDto } from './dto';
@@ -69,7 +73,9 @@ export class NotificationsService {
     }
 
     if (notification.userId !== userId) {
-      throw new ForbiddenException('You can only access your own notifications');
+      throw new ForbiddenException(
+        'You can only access your own notifications',
+      );
     }
 
     return notification;
@@ -149,7 +155,8 @@ export class NotificationsService {
       CANCELLED: 'Your order has been cancelled.',
     };
 
-    const body = statusMessages[newStatus] || `Order status updated to ${newStatus}`;
+    const body =
+      statusMessages[newStatus] || `Order status updated to ${newStatus}`;
 
     await this.create({
       userId,
@@ -247,7 +254,12 @@ export class NotificationsService {
   /**
    * Create system notification
    */
-  async notifySystem(userId: string, title: string, body: string, data?: Record<string, any>) {
+  async notifySystem(
+    userId: string,
+    title: string,
+    body: string,
+    data?: Record<string, any>,
+  ) {
     await this.create({
       userId,
       type: NotificationType.SYSTEM,

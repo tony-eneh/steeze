@@ -8,11 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateReturnRequestDto } from './dto/create-return-request.dto';
 import { UpdateReturnRequestDto } from './dto/update-return-request.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
-import {
-  OrderStatus,
-  PaymentStatus,
-  TransactionType,
-} from '@prisma/client';
+import { OrderStatus, PaymentStatus, TransactionType } from '@prisma/client';
 import { subDays } from 'date-fns';
 import { NotificationsService } from '../notifications/notifications.service';
 

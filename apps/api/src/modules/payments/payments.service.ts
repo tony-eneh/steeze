@@ -252,7 +252,7 @@ export class PaymentsService {
           designer: { include: { user: true } },
         },
       });
-      
+
       if (order) {
         // Notify customer
         await this.notificationsService.notifyPaymentUpdate(

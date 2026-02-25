@@ -39,7 +39,9 @@ export class AdminService {
       }),
       this.prisma.order.count({
         where: {
-          status: { in: ['PAID', 'ACCEPTED', 'IN_PROGRESS', 'READY_FOR_PICKUP'] },
+          status: {
+            in: ['PAID', 'ACCEPTED', 'IN_PROGRESS', 'READY_FOR_PICKUP'],
+          },
         },
       }),
       this.prisma.order.count({
@@ -336,28 +338,24 @@ export class AdminService {
    * Get payments overview
    */
   async getPaymentsOverview() {
-    const [
-      totalEscrow,
-      totalReleased,
-      totalRefunded,
-      pendingRelease,
-    ] = await Promise.all([
-      this.prisma.payment.aggregate({
-        _sum: { amount: true },
-        where: { status: 'HELD_IN_ESCROW' },
-      }),
-      this.prisma.payment.aggregate({
-        _sum: { amount: true },
-        where: { status: 'RELEASED' },
-      }),
-      this.prisma.payment.aggregate({
-        _sum: { amount: true },
-        where: { status: 'REFUNDED' },
-      }),
-      this.prisma.payment.count({
-        where: { status: 'HELD_IN_ESCROW' },
-      }),
-    ]);
+    const [totalEscrow, totalReleased, totalRefunded, pendingRelease] =
+      await Promise.all([
+        this.prisma.payment.aggregate({
+          _sum: { amount: true },
+          where: { status: 'HELD_IN_ESCROW' },
+        }),
+        this.prisma.payment.aggregate({
+          _sum: { amount: true },
+          where: { status: 'RELEASED' },
+        }),
+        this.prisma.payment.aggregate({
+          _sum: { amount: true },
+          where: { status: 'REFUNDED' },
+        }),
+        this.prisma.payment.count({
+          where: { status: 'HELD_IN_ESCROW' },
+        }),
+      ]);
 
     return {
       totalEscrow: totalEscrow._sum.amount || 0,
