@@ -304,6 +304,9 @@ importers:
       '@ionic/angular':
         specifier: ^8.0.0
         version: 8.7.17(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10))(@angular/forms@17.3.12(@angular/common@17.3.12(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10))(rxjs@7.8.2))(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10))(@angular/platform-browser@17.3.12(@angular/animations@17.3.12(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10)))(@angular/common@17.3.12(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10))(rxjs@7.8.2))(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10)))(rxjs@7.8.2))(@angular/router@17.3.12(@angular/common@17.3.12(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10))(rxjs@7.8.2))(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10))(@angular/platform-browser@17.3.12(@angular/animations@17.3.12(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10)))(@angular/common@17.3.12(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10))(rxjs@7.8.2))(@angular/core@17.3.12(rxjs@7.8.2)(zone.js@0.14.10)))(rxjs@7.8.2))(rxjs@7.8.2)(zone.js@0.14.10)
+      '@material/typography':
+        specifier: ^14.0.0
+        version: 14.0.0
       ionicons:
         specifier: ^7.0.0
         version: 7.4.0
@@ -1905,6 +1908,9 @@ packages:
   '@material/fab@15.0.0-canary.7f224ddd4.0':
     resolution: {integrity: sha512-4h76QrzfZTcPdd+awDPZ4Q0YdSqsXQnS540TPtyXUJ/5G99V6VwGpjMPIxAsW0y+pmI9UkLL/srrMaJec+7r4Q==}
 
+  '@material/feature-targeting@14.0.0':
+    resolution: {integrity: sha512-a5WGgHEq5lJeeNL5yevtgoZjBjXWy6+klfVWQEh8oyix/rMJygGgO7gEc52uv8fB8uAIoYEB3iBMOv8jRq8FeA==}
+
   '@material/feature-targeting@15.0.0-canary.7f224ddd4.0':
     resolution: {integrity: sha512-SAjtxYh6YlKZriU83diDEQ7jNSP2MnxKsER0TvFeyG1vX/DWsUyYDOIJTOEa9K1N+fgJEBkNK8hY55QhQaspew==}
 
@@ -1989,6 +1995,9 @@ packages:
   '@material/textfield@15.0.0-canary.7f224ddd4.0':
     resolution: {integrity: sha512-AExmFvgE5nNF0UA4l2cSzPghtxSUQeeoyRjFLHLy+oAaE4eKZFrSy0zEpqPeWPQpEMDZk+6Y+6T3cOFYBeSvsw==}
 
+  '@material/theme@14.0.0':
+    resolution: {integrity: sha512-6/SENWNIFuXzeHMPHrYwbsXKgkvCtWuzzQ3cUu4UEt3KcQ5YpViazIM6h8ByYKZP8A9d8QpkJ0WGX5btGDcVoA==}
+
   '@material/theme@15.0.0-canary.7f224ddd4.0':
     resolution: {integrity: sha512-hs45hJoE9yVnoVOcsN1jklyOa51U4lzWsEnQEuJTPOk2+0HqCQ0yv/q0InpSnm2i69fNSyZC60+8HADZGF8ugQ==}
 
@@ -2003,6 +2012,9 @@ packages:
 
   '@material/touch-target@15.0.0-canary.7f224ddd4.0':
     resolution: {integrity: sha512-BJo/wFKHPYLGsRaIpd7vsQwKr02LtO2e89Psv0on/p0OephlNIgeB9dD9W+bQmaeZsZ6liKSKRl6wJWDiK71PA==}
+
+  '@material/typography@14.0.0':
+    resolution: {integrity: sha512-/QtHBYiTR+TPMryM/CT386B2WlAQf/Ae32V324Z7P40gHLKY/YBXx7FDutAWZFeOerq/two4Nd2aAHBcMM2wMw==}
 
   '@material/typography@15.0.0-canary.7f224ddd4.0':
     resolution: {integrity: sha512-kBaZeCGD50iq1DeRRH5OM5Jl7Gdk+/NOfKArkY4ksBZvJiStJ7ACAhpvb8MEGm4s3jvDInQFLsDq3hL+SA79sQ==}
@@ -8862,6 +8874,10 @@ snapshots:
       '@material/typography': 15.0.0-canary.7f224ddd4.0
       tslib: 2.8.1
 
+  '@material/feature-targeting@14.0.0':
+    dependencies:
+      tslib: 2.8.1
+
   '@material/feature-targeting@15.0.0-canary.7f224ddd4.0':
     dependencies:
       tslib: 2.8.1
@@ -9172,6 +9188,11 @@ snapshots:
       '@material/typography': 15.0.0-canary.7f224ddd4.0
       tslib: 2.8.1
 
+  '@material/theme@14.0.0':
+    dependencies:
+      '@material/feature-targeting': 14.0.0
+      tslib: 2.8.1
+
   '@material/theme@15.0.0-canary.7f224ddd4.0':
     dependencies:
       '@material/feature-targeting': 15.0.0-canary.7f224ddd4.0
@@ -9215,6 +9236,12 @@ snapshots:
       '@material/feature-targeting': 15.0.0-canary.7f224ddd4.0
       '@material/rtl': 15.0.0-canary.7f224ddd4.0
       '@material/theme': 15.0.0-canary.7f224ddd4.0
+      tslib: 2.8.1
+
+  '@material/typography@14.0.0':
+    dependencies:
+      '@material/feature-targeting': 14.0.0
+      '@material/theme': 14.0.0
       tslib: 2.8.1
 
   '@material/typography@15.0.0-canary.7f224ddd4.0':
