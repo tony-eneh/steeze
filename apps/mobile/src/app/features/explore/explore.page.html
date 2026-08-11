@@ -6,15 +6,27 @@
 
 <ion-content>
   <div class="search-block ion-padding">
-    <ion-searchbar [(ngModel)]="search" placeholder="Search designs or designers">
+    <ion-searchbar
+      [(ngModel)]="search"
+      (ionInput)="onSearchChange()"
+      placeholder="Search designs or designers"
+    >
     </ion-searchbar>
     <div class="filters">
-      <ion-select [(ngModel)]="category" placeholder="Category">
+      <ion-select
+        [(ngModel)]="category"
+        (ionChange)="onFilterChange()"
+        placeholder="Category"
+      >
         <ion-select-option value="gown">Gown</ion-select-option>
         <ion-select-option value="agbada">Agbada</ion-select-option>
         <ion-select-option value="suit">Suit</ion-select-option>
       </ion-select>
-      <ion-select [(ngModel)]="gender" placeholder="Gender">
+      <ion-select
+        [(ngModel)]="gender"
+        (ionChange)="onFilterChange()"
+        placeholder="Gender"
+      >
         <ion-select-option value="male">Male</ion-select-option>
         <ion-select-option value="female">Female</ion-select-option>
         <ion-select-option value="unisex">Unisex</ion-select-option>
@@ -22,31 +34,43 @@
     </div>
   </div>
 
-  <ion-list>
-    <ion-item lines="none">
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading designs...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ion-list *ngIf="!isLoading && designs.length">
+    <ion-item
+      *ngFor="let design of designs"
+      [routerLink]="['/designs', design.id]"
+      detail
+    >
+      <ion-thumbnail slot="start" *ngIf="design.imageUrl">
+        <img [src]="design.imageUrl" [alt]="design.title" />
+      </ion-thumbnail>
       <ion-label>
-        <h2>Curated collections</h2>
-        <p>Seasonal drops and trending looks.</p>
-      </ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-label>
-        <h3>Classic Ankara</h3>
-        <p>Bold prints and vibrant colorways.</p>
-      </ion-label>
-      <ion-badge color="secondary">New</ion-badge>
-    </ion-item>
-    <ion-item>
-      <ion-label>
-        <h3>Modern Bridal</h3>
-        <p>Luxury fabrics for memorable ceremonies.</p>
-      </ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-label>
-        <h3>Everyday Essentials</h3>
-        <p>Workwear and casual staples.</p>
+        <h3>{{ design.title }}</h3>
+        <p>{{ design.designerName }}</p>
+        <p>
+          {{ design.currency }}
+          {{ design.basePrice | number: '1.0-0' }}
+        </p>
       </ion-label>
     </ion-item>
   </ion-list>
+
+  <app-empty-state
+    *ngIf="!isLoading && !designs.length && !errorMessage"
+    title="No designs match"
+    message="Try a different search or clear your filters."
+  ></app-empty-state>
+
+  <div class="ion-padding" *ngIf="!isLoading && !designs.length && !errorMessage">
+    <ion-button expand="block" fill="outline" (click)="clearFilters()">
+      Clear filters
+    </ion-button>
+  </div>
 </ion-content>

@@ -14,43 +14,64 @@
   </ion-card>
 
   <ng-container *ngIf="design">
-    <div class="hero-image"></div>
+    <div class="hero-image">
+      <img *ngIf="primaryImage" [src]="primaryImage" [alt]="design.title" />
+    </div>
     <h2>{{ design.title }}</h2>
     <p class="subtitle">{{ design.designerName }}</p>
 
     <p>{{ design.description }}</p>
 
+    <ion-list *ngIf="design.fabricOptions.length">
+      <ion-list-header>
+        <ion-label>Fabric</ion-label>
+      </ion-list-header>
+      <ion-radio-group [(ngModel)]="selectedFabricId">
+        <ion-item *ngFor="let option of design.fabricOptions">
+          <ion-label>{{ option.name }}</ion-label>
+          <ion-note slot="end">
+            +{{ option.priceAdjustment | number: '1.0-0' }}
+          </ion-note>
+          <ion-radio slot="start" [value]="option.id"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
+    </ion-list>
+
+    <ion-list *ngIf="design.sizePricings.length">
+      <ion-list-header>
+        <ion-label>Size</ion-label>
+      </ion-list-header>
+      <ion-radio-group [(ngModel)]="selectedSizeLabel">
+        <ion-item *ngFor="let pricing of design.sizePricings">
+          <ion-label>{{ pricing.sizeLabel }}</ion-label>
+          <ion-note slot="end">
+            +{{ pricing.priceAdjustment | number: '1.0-0' }}
+          </ion-note>
+          <ion-radio slot="start" [value]="pricing.sizeLabel"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
+    </ion-list>
+
+    <ion-list *ngIf="design.addOns.length">
+      <ion-list-header>
+        <ion-label>Add-ons</ion-label>
+      </ion-list-header>
+      <ion-item *ngFor="let addOn of design.addOns">
+        <ion-checkbox
+          slot="start"
+          [checked]="isAddOnSelected(addOn.id)"
+          (ionChange)="toggleAddOn(addOn.id)"
+        ></ion-checkbox>
+        <ion-label>{{ addOn.name }}</ion-label>
+        <ion-note slot="end">+{{ addOn.price | number: '1.0-0' }}</ion-note>
+      </ion-item>
+    </ion-list>
+
     <div class="price">
-      {{ design.basePrice | number: '1.0-0' }} {{ design.currency }}
+      {{ total | number: '1.0-0' }} {{ design.currency }}
     </div>
 
-    <ion-list>
-      <ion-item>
-        <ion-label>
-          <h3>Fabric options</h3>
-          <p>Select a fabric from the available list.</p>
-        </ion-label>
-      </ion-item>
-      <ion-item *ngFor="let option of design.fabricOptions">
-        <ion-label>{{ option.name }}</ion-label>
-        <ion-note slot="end">+{{ option.priceAdjustment }}</ion-note>
-      </ion-item>
-    </ion-list>
-
-    <ion-list>
-      <ion-item>
-        <ion-label>
-          <h3>Add-ons</h3>
-          <p>Optional finishing touches.</p>
-        </ion-label>
-      </ion-item>
-      <ion-item *ngFor="let addOn of design.addOns">
-        <ion-label>{{ addOn.name }}</ion-label>
-        <ion-note slot="end">+{{ addOn.price }}</ion-note>
-      </ion-item>
-    </ion-list>
-
-    <ion-button class="cta" expand="block" routerLink="/checkout">
+    <ion-button class="cta" expand="block" (click)="startOrder()">
       Start order
     </ion-button>
   </ng-container>
