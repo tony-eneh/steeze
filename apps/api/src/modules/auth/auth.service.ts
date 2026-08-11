@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   ConflictException,
   UnauthorizedException,
   BadRequestException,
@@ -7,16 +8,28 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
+import {
+  emailVerificationEmail,
+  passwordResetEmail,
+} from '../mail/mail.templates';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
+const PASSWORD_RESET_TTL_MINUTES = 30;
+const EMAIL_VERIFICATION_TTL_HOURS = 24;
+
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private mailService: MailService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -83,6 +96,17 @@ export class AuthService {
           shopState: registerDto.shopState,
         },
       });
+    }
+
+    // A failed verification email must not fail the registration itself; the
+    // user can request a new link from their profile.
+    try {
+      await this.sendEmailVerification(user.id);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      this.logger.warn(
+        `Could not send verification email to ${user.email}: ${reason}`,
+      );
     }
 
     // Generate tokens
@@ -154,29 +178,161 @@ export class AuthService {
   }
 
   async forgotPassword(email: string) {
+    // The response is identical whether or not the account exists, so the
+    // endpoint cannot be used to enumerate registered emails.
+    const genericResponse = {
+      message: 'If the email exists, a reset link has been sent',
+    };
+
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
 
-    if (!user) {
-      // Don't reveal if user exists
-      return { message: 'If the email exists, a reset link has been sent' };
+    if (!user || !user.isActive) {
+      return genericResponse;
     }
 
-    // TODO: Generate reset token and send email
-    // For now, we'll just return a success message
-    return { message: 'If the email exists, a reset link has been sent' };
+    const { token, tokenHash } = this.createToken();
+
+    // Only the newest link should work, so retire any outstanding ones.
+    await this.prisma.passwordResetToken.updateMany({
+      where: { userId: user.id, usedAt: null },
+      data: { usedAt: new Date() },
+    });
+
+    await this.prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash,
+        expiresAt: new Date(
+          Date.now() + PASSWORD_RESET_TTL_MINUTES * 60 * 1000,
+        ),
+      },
+    });
+
+    const { subject, html } = passwordResetEmail({
+      platformName: this.platformName,
+      firstName: user.firstName,
+      resetUrl: `${this.webUrl}/reset-password?token=${token}`,
+      expiresInMinutes: PASSWORD_RESET_TTL_MINUTES,
+    });
+
+    await this.mailService.send({ to: user.email, subject, html });
+
+    return genericResponse;
   }
 
   async resetPassword(token: string, newPassword: string) {
-    // TODO: Verify token and reset password
-    // For now, just throw not implemented
-    throw new BadRequestException('Password reset not yet implemented');
+    const record = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash: this.hashToken(token) },
+    });
+
+    if (!record || record.usedAt || record.expiresAt < new Date()) {
+      throw new BadRequestException('Reset link is invalid or has expired');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: record.userId },
+        data: { passwordHash },
+      }),
+      this.prisma.passwordResetToken.update({
+        where: { id: record.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    return { message: 'Password has been reset. You can now log in.' };
+  }
+
+  async sendEmailVerification(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.isEmailVerified) {
+      return { message: 'Email is already verified' };
+    }
+
+    const { token, tokenHash } = this.createToken();
+
+    await this.prisma.emailVerificationToken.updateMany({
+      where: { userId: user.id, usedAt: null },
+      data: { usedAt: new Date() },
+    });
+
+    await this.prisma.emailVerificationToken.create({
+      data: {
+        userId: user.id,
+        tokenHash,
+        expiresAt: new Date(
+          Date.now() + EMAIL_VERIFICATION_TTL_HOURS * 60 * 60 * 1000,
+        ),
+      },
+    });
+
+    const { subject, html } = emailVerificationEmail({
+      platformName: this.platformName,
+      firstName: user.firstName,
+      verifyUrl: `${this.webUrl}/verify-email?token=${token}`,
+      expiresInHours: EMAIL_VERIFICATION_TTL_HOURS,
+    });
+
+    await this.mailService.send({ to: user.email, subject, html });
+
+    return { message: 'Verification email sent' };
   }
 
   async verifyEmail(token: string) {
-    // TODO: Verify email token
-    throw new BadRequestException('Email verification not yet implemented');
+    const record = await this.prisma.emailVerificationToken.findUnique({
+      where: { tokenHash: this.hashToken(token) },
+    });
+
+    if (!record || record.usedAt || record.expiresAt < new Date()) {
+      throw new BadRequestException(
+        'Verification link is invalid or has expired',
+      );
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: record.userId },
+        data: { isEmailVerified: true },
+      }),
+      this.prisma.emailVerificationToken.update({
+        where: { id: record.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    return { message: 'Email verified successfully' };
+  }
+
+  /**
+   * Returns the raw token to email out and the hash to persist. Storing only
+   * the hash means a database leak does not hand over usable reset links.
+   */
+  private createToken(): { token: string; tokenHash: string } {
+    const token = crypto.randomBytes(32).toString('hex');
+    return { token, tokenHash: this.hashToken(token) };
+  }
+
+  private hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
+  }
+
+  private get platformName(): string {
+    return this.configService.get<string>('PLATFORM_NAME') ?? 'Steeze';
+  }
+
+  private get webUrl(): string {
+    return (
+      this.configService.get<string>('PLATFORM_URL') ?? 'https://steeze.com'
+    ).replace(/\/$/, '');
   }
 
   private async generateTokens(userId: string, email: string, role: string) {

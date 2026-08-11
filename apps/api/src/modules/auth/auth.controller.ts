@@ -12,6 +12,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
@@ -72,6 +73,25 @@ export class AuthController {
       resetPasswordDto.token,
       resetPasswordDto.newPassword,
     );
+  }
+
+  @Post('verify-email')
+  @Throttle(CREDENTIAL_THROTTLE)
+  @ApiOperation({ summary: 'Confirm an email address with a token' })
+  @ApiResponse({ status: 200, description: 'Email verified' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.authService.verifyEmail(verifyEmailDto.token);
+  }
+
+  @Post('resend-verification')
+  @Throttle(CREDENTIAL_THROTTLE)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Resend the email verification link' })
+  @ApiResponse({ status: 200, description: 'Verification email sent' })
+  async resendVerification(@CurrentUser('id') userId: string) {
+    return this.authService.sendEmailVerification(userId);
   }
 
   @Get('me')
