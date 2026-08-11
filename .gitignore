@@ -50,3 +50,6 @@ prisma/dev.db-journal
 tmp
 temp
 *.tsbuildinfo
+
+# Vercel CLI link metadata
+.vercel
