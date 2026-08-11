@@ -17,6 +17,9 @@ COPY apps/api/ ./apps/api/
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
+# Prisma config requires DATABASE_URL even for generate (no DB connection at build time)
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
+
 # Generate Prisma client
 RUN cd apps/api && pnpm exec prisma generate
 
