@@ -9,8 +9,8 @@ echo "==> Applying database migrations"
 ./node_modules/.bin/prisma migrate deploy
 
 if [ "$RUN_DB_SEED" = "true" ]; then
-  echo "==> Seeding database"
-  ./node_modules/.bin/prisma db seed
+  echo "==> Seeding admin user"
+  node prisma/seed-admin.js || echo "Seed skipped (non-fatal)"
 fi
 
 echo "==> Starting API"
