@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.steeze.com/api/v1'
+  apiUrl: 'https://steeze-api.onrender.com/api/v1'
 };
