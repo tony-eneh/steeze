@@ -15,6 +15,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/authenticated-user';
 
 // Credential endpoints are the ones worth brute forcing, so they get a much
 // tighter budget than the global default.
@@ -100,7 +101,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current user' })
   @ApiResponse({ status: 200, description: 'Current user data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getMe(@CurrentUser() user: any) {
+  getMe(@CurrentUser() user: AuthenticatedUser) {
     return {
       success: true,
       data: user,

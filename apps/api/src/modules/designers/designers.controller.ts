@@ -21,6 +21,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/authenticated-user';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('designers')
@@ -85,7 +86,7 @@ export class DesignersController {
   @ApiOperation({ summary: 'Update own designer profile' })
   @ApiResponse({ status: 200, description: 'Profile updated' })
   async updateMyProfile(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() updateDto: UpdateDesignerProfileDto,
   ) {
     const designer = await this.designersService.updateMyProfile(
@@ -109,7 +110,7 @@ export class DesignersController {
   @ApiQuery({ name: 'status', required: false })
   @ApiResponse({ status: 200, description: 'Orders retrieved' })
   async getMyOrders(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Query() paginationDto: PaginationDto,
     @Query('status') status?: string,
   ) {
@@ -131,7 +132,7 @@ export class DesignersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get earnings summary (designer only)' })
   @ApiResponse({ status: 200, description: 'Earnings retrieved' })
-  async getMyEarnings(@CurrentUser() user: any) {
+  async getMyEarnings(@CurrentUser() user: AuthenticatedUser) {
     const earnings = await this.designersService.getMyEarnings(user.id);
     return {
       success: true,

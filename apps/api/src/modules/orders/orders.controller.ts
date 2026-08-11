@@ -23,6 +23,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/authenticated-user';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('orders')
@@ -37,7 +38,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Create a new order (customer only)' })
   @ApiResponse({ status: 201, description: 'Order created' })
   async create(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() createOrderDto: CreateOrderDto,
   ) {
     const order = await this.ordersService.create(user.id, createOrderDto);
@@ -57,7 +58,7 @@ export class OrdersController {
   @ApiQuery({ name: 'status', required: false })
   @ApiResponse({ status: 200, description: 'Orders retrieved' })
   async findAll(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Query() paginationDto: PaginationDto,
     @Query('status') status?: string,
   ) {
@@ -79,7 +80,10 @@ export class OrdersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get order detail' })
   @ApiResponse({ status: 200, description: 'Order retrieved' })
-  async findOne(@CurrentUser() user: any, @Param('id') id: string) {
+  async findOne(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ) {
     const order = await this.ordersService.findOne(id, user.id);
     return {
       success: true,
@@ -95,7 +99,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Accept order (designer only)' })
   @ApiResponse({ status: 200, description: 'Order accepted' })
   async acceptOrder(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
@@ -114,7 +118,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Reject order (designer only)' })
   @ApiResponse({ status: 200, description: 'Order rejected' })
   async rejectOrder(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
@@ -133,7 +137,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Mark order as in progress (designer only)' })
   @ApiResponse({ status: 200, description: 'Order status updated' })
   async markInProgress(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
@@ -156,7 +160,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Mark order as ready for pickup (designer only)' })
   @ApiResponse({ status: 200, description: 'Order marked as ready' })
   async markReady(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
@@ -229,15 +233,11 @@ export class OrdersController {
   @ApiOperation({ summary: 'Confirm order satisfaction (customer only)' })
   @ApiResponse({ status: 200, description: 'Order confirmed' })
   async confirmOrder(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
-    const order = await this.ordersService.confirmOrder(
-      user.id,
-      id,
-      updateDto,
-    );
+    const order = await this.ordersService.confirmOrder(user.id, id, updateDto);
     return {
       success: true,
       data: order,
@@ -252,7 +252,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Cancel order (customer only, before accepted)' })
   @ApiResponse({ status: 200, description: 'Order cancelled' })
   async cancelOrder(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
@@ -269,7 +269,10 @@ export class OrdersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get order status history' })
   @ApiResponse({ status: 200, description: 'Status history retrieved' })
-  async getStatusHistory(@CurrentUser() user: any, @Param('id') id: string) {
+  async getStatusHistory(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ) {
     const history = await this.ordersService.getStatusHistory(id, user.id);
     return {
       success: true,

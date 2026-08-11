@@ -23,6 +23,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/authenticated-user';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('returns')
@@ -40,7 +41,7 @@ export class ReturnsController {
   })
   @ApiResponse({ status: 201, description: 'Return request created' })
   async createReturnRequest(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('orderId') orderId: string,
     @Body() createReturnRequestDto: CreateReturnRequestDto,
   ) {
@@ -99,7 +100,7 @@ export class ReturnsController {
   @ApiOperation({ summary: 'Approve return request (admin only)' })
   @ApiResponse({ status: 200, description: 'Return request approved' })
   async approve(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDto: UpdateReturnRequestDto,
   ) {
@@ -122,7 +123,7 @@ export class ReturnsController {
   @ApiOperation({ summary: 'Reject return request (admin only)' })
   @ApiResponse({ status: 200, description: 'Return request rejected' })
   async reject(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDto: UpdateReturnRequestDto,
   ) {
@@ -147,7 +148,7 @@ export class ReturnsController {
   })
   @ApiResponse({ status: 200, description: 'Courier dispatch recorded' })
   async markPickupDispatched(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDto: UpdateReturnRequestDto,
   ) {
@@ -173,7 +174,7 @@ export class ReturnsController {
   })
   @ApiResponse({ status: 200, description: 'Return completed' })
   async markReturned(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDto: UpdateReturnRequestDto,
   ) {

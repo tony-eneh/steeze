@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsIn, IsObject } from 'class-validator';
+import { IsEmail, IsOptional, IsIn, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LinkOpenTailorDto {

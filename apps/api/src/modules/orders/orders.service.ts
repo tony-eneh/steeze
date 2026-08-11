@@ -121,14 +121,14 @@ export class OrdersService {
           await this.openTailorService.getMeasurementsByEmail(
             user.openTailorEmail,
           );
-      } catch (error) {
+      } catch {
         // If measurements not found, just store the email
         measurementSnapshot = { email: user.openTailorEmail };
       }
     }
 
     // Generate order number
-    const orderNumber = await this.generateOrderNumber();
+    const orderNumber = this.generateOrderNumber();
 
     // Create order in transaction
     const order = await this.prisma.$transaction(async (tx) => {
@@ -826,7 +826,7 @@ export class OrdersService {
     return order;
   }
 
-  private async generateOrderNumber(): Promise<string> {
+  private generateOrderNumber(): string {
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');

@@ -28,6 +28,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/authenticated-user';
 import { UserRole } from '@prisma/client';
 
 @ApiTags('designs')
@@ -42,7 +43,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Create a new design (designer only)' })
   @ApiResponse({ status: 201, description: 'Design created' })
   async create(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() createDesignDto: CreateDesignDto,
   ) {
     const design = await this.designsService.create(user.id, createDesignDto);
@@ -107,7 +108,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Update design (designer only)' })
   @ApiResponse({ status: 200, description: 'Design updated' })
   async update(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateDesignDto: UpdateDesignDto,
   ) {
@@ -129,7 +130,10 @@ export class DesignsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete design (designer only)' })
   @ApiResponse({ status: 200, description: 'Design deleted' })
-  async remove(@CurrentUser() user: any, @Param('id') id: string) {
+  async remove(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ) {
     return this.designsService.remove(user.id, id);
   }
 
@@ -140,11 +144,12 @@ export class DesignsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Attach an uploaded image to a design',
-    description: 'Upload the file via POST /media/upload first, then pass the returned URL here.',
+    description:
+      'Upload the file via POST /media/upload first, then pass the returned URL here.',
   })
   @ApiResponse({ status: 201, description: 'Image attached' })
   async addImage(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() addImageDto: AddDesignImageDto,
   ) {
@@ -163,7 +168,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Make an image the design thumbnail' })
   @ApiResponse({ status: 200, description: 'Primary image updated' })
   async setPrimaryImage(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Param('imageId') imageId: string,
   ) {
@@ -177,7 +182,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Remove an image from a design' })
   @ApiResponse({ status: 200, description: 'Image deleted' })
   async removeImage(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Param('imageId') imageId: string,
   ) {
@@ -192,7 +197,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Add fabric option' })
   @ApiResponse({ status: 201, description: 'Fabric option added' })
   async addFabricOption(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() createFabricDto: CreateFabricOptionDto,
   ) {
@@ -215,7 +220,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Update fabric option' })
   @ApiResponse({ status: 200, description: 'Fabric option updated' })
   async updateFabricOption(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Param('fabricId') fabricId: string,
     @Body() updateDto: Partial<CreateFabricOptionDto>,
@@ -240,7 +245,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Delete fabric option' })
   @ApiResponse({ status: 200, description: 'Fabric option deleted' })
   async removeFabricOption(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Param('fabricId') fabricId: string,
   ) {
@@ -255,7 +260,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Add add-on' })
   @ApiResponse({ status: 201, description: 'Add-on added' })
   async addAddOn(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() createAddOnDto: CreateAddOnDto,
   ) {
@@ -278,7 +283,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Update add-on' })
   @ApiResponse({ status: 200, description: 'Add-on updated' })
   async updateAddOn(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Param('addonId') addonId: string,
     @Body() updateDto: Partial<CreateAddOnDto>,
@@ -303,7 +308,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Delete add-on' })
   @ApiResponse({ status: 200, description: 'Add-on deleted' })
   async removeAddOn(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Param('addonId') addonId: string,
   ) {
@@ -318,7 +323,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Add size pricing' })
   @ApiResponse({ status: 201, description: 'Size pricing added' })
   async addSizePricing(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() createSizePricingDto: CreateSizePricingDto,
   ) {
@@ -341,7 +346,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Update size pricing' })
   @ApiResponse({ status: 200, description: 'Size pricing updated' })
   async updateSizePricing(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Param('pricingId') pricingId: string,
     @Body() updateDto: Partial<CreateSizePricingDto>,
@@ -366,7 +371,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Delete size pricing' })
   @ApiResponse({ status: 200, description: 'Size pricing deleted' })
   async removeSizePricing(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Param('pricingId') pricingId: string,
   ) {

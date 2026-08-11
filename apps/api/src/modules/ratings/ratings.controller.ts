@@ -19,6 +19,7 @@ import { CreateRatingDto } from './dto/create-rating.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/authenticated-user';
 
 @ApiTags('ratings')
 @Controller('ratings')
@@ -34,7 +35,7 @@ export class RatingsController {
   })
   @ApiResponse({ status: 201, description: 'Rating created' })
   async createRating(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('orderId') orderId: string,
     @Body() createRatingDto: CreateRatingDto,
   ) {
@@ -78,7 +79,7 @@ export class RatingsController {
   @ApiOperation({ summary: 'Get ratings for an order' })
   @ApiResponse({ status: 200, description: 'Ratings retrieved' })
   async getRatingsForOrder(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('orderId') orderId: string,
   ) {
     const ratings = await this.ratingsService.getRatingsForOrder(

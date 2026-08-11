@@ -14,7 +14,6 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { ListNotificationsDto, RegisterDeviceDto } from './dto';
@@ -65,10 +64,7 @@ export class NotificationsController {
     status: 200,
     description: 'Notification marked as read',
   })
-  async markAsRead(
-    @Param('id') id: string,
-    @CurrentUser('id') userId: string,
-  ) {
+  async markAsRead(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.notificationsService.markAsRead(id, userId);
   }
 

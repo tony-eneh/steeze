@@ -13,6 +13,7 @@ import {
 } from './dto/measurement.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/authenticated-user';
 
 @ApiTags('measurements')
 @Controller('measurements')
@@ -25,7 +26,7 @@ export class MeasurementsController {
   @ApiOperation({ summary: 'Link Open Tailor email to account' })
   @ApiResponse({ status: 200, description: 'Email linked successfully' })
   async linkEmail(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() linkDto: LinkOpenTailorDto,
   ) {
     const result = await this.measurementsService.linkOpenTailorEmail(
@@ -44,7 +45,7 @@ export class MeasurementsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get own measurements from Open Tailor' })
   @ApiResponse({ status: 200, description: 'Measurements retrieved' })
-  async getMyMeasurements(@CurrentUser() user: any) {
+  async getMyMeasurements(@CurrentUser() user: AuthenticatedUser) {
     const measurements = await this.measurementsService.getMyMeasurements(
       user.id,
     );
@@ -61,7 +62,7 @@ export class MeasurementsController {
   @ApiOperation({ summary: 'Create measurements in Open Tailor' })
   @ApiResponse({ status: 201, description: 'Measurements created' })
   async createMeasurement(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() createDto: CreateMeasurementDto,
   ) {
     const measurement = await this.measurementsService.createMeasurement(
@@ -81,7 +82,7 @@ export class MeasurementsController {
   @ApiOperation({ summary: 'Update measurements in Open Tailor' })
   @ApiResponse({ status: 200, description: 'Measurements updated' })
   async updateMeasurement(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() updateDto: UpdateMeasurementDto,
   ) {
     const measurement = await this.measurementsService.updateMeasurement(

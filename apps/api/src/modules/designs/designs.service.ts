@@ -193,7 +193,7 @@ export class DesignsService {
     designId: string,
     updateDesignDto: UpdateDesignDto,
   ) {
-    const design = await this.checkOwnership(userId, designId);
+    await this.checkOwnership(userId, designId);
 
     const updated = await this.prisma.design.update({
       where: { id: designId },

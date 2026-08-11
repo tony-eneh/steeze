@@ -172,7 +172,7 @@ export class AuthService {
       }
 
       return this.generateTokens(user.id, user.email, user.role);
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }

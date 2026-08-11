@@ -20,6 +20,7 @@ import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../common/types/authenticated-user';
 
 @ApiTags('users')
 @Controller('users')
@@ -31,7 +32,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get own profile' })
   @ApiResponse({ status: 200, description: 'User profile retrieved' })
-  async getMe(@CurrentUser() user: any) {
+  async getMe(@CurrentUser() user: AuthenticatedUser) {
     const userData = await this.usersService.findById(user.id);
     return {
       success: true,
@@ -46,7 +47,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Update own profile' })
   @ApiResponse({ status: 200, description: 'Profile updated' })
   async updateMe(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     const userData = await this.usersService.updateProfile(
@@ -78,7 +79,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List own addresses' })
   @ApiResponse({ status: 200, description: 'Addresses retrieved' })
-  async getAddresses(@CurrentUser() user: any) {
+  async getAddresses(@CurrentUser() user: AuthenticatedUser) {
     const addresses = await this.usersService.getAddresses(user.id);
     return {
       success: true,
@@ -93,7 +94,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Add a new address' })
   @ApiResponse({ status: 201, description: 'Address created' })
   async createAddress(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() createAddressDto: CreateAddressDto,
   ) {
     const address = await this.usersService.createAddress(
@@ -113,7 +114,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Update an address' })
   @ApiResponse({ status: 200, description: 'Address updated' })
   async updateAddress(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateAddressDto: UpdateAddressDto,
   ) {
@@ -134,7 +135,10 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an address' })
   @ApiResponse({ status: 200, description: 'Address deleted' })
-  async deleteAddress(@CurrentUser() user: any, @Param('id') id: string) {
+  async deleteAddress(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ) {
     return this.usersService.deleteAddress(user.id, id);
   }
 }

@@ -71,7 +71,7 @@ export class PaymentsService {
                 'This order has already been paid for',
               );
             }
-          } catch (error) {
+          } catch {
             // If verification fails, payment likely expired, create new one
             this.logger.log('Previous payment expired, creating new payment');
           }

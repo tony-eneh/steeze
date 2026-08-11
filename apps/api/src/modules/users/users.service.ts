@@ -85,7 +85,7 @@ export class UsersService {
       });
 
       return user;
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Failed to update user profile');
     }
   }

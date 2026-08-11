@@ -79,7 +79,7 @@ export class OpenTailorService {
     try {
       await firstValueFrom(this.httpService.get(`${this.baseUrl}/health`));
       return true;
-    } catch (error) {
+    } catch {
       this.logger.warn('Open Tailor API is not reachable');
       return false;
     }

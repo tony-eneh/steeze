@@ -132,7 +132,15 @@ export class MediaService implements OnModuleInit {
         },
         (error, result) => {
           if (error || !result) {
-            reject(error ?? new Error('Upload returned no result'));
+            reject(
+              error instanceof Error
+                ? error
+                : new Error(
+                    error
+                      ? `Cloudinary upload failed: ${JSON.stringify(error)}`
+                      : 'Upload returned no result',
+                  ),
+            );
             return;
           }
           resolve(result);
