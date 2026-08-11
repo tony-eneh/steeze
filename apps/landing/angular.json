@@ -18,7 +18,12 @@
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              { "glob": "robots.txt", "input": "src", "output": "/" },
+              { "glob": "sitemap.xml", "input": "src", "output": "/" }
+            ],
             "styles": ["src/styles.scss"],
             "server": "src/main.server.ts",
             "prerender": true,
@@ -28,6 +33,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 { "type": "initial", "maximumWarning": "1mb", "maximumError": "2mb" }
               ],
