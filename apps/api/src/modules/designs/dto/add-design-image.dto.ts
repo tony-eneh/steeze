@@ -10,7 +10,9 @@ import {
 } from 'class-validator';
 
 export class AddDesignImageDto {
-  @ApiProperty({ example: 'https://res.cloudinary.com/steeze/image/upload/x.jpg' })
+  @ApiProperty({
+    example: 'https://res.cloudinary.com/steeze/image/upload/x.jpg',
+  })
   @IsUrl()
   url: string;
 
