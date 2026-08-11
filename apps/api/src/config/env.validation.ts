@@ -16,6 +16,11 @@ export const configValidationSchema = Joi.object({
   // API
   API_URL: Joi.string().default('http://localhost:3001'),
   PORT: Joi.number().default(3001),
+  NODE_ENV: Joi.string()
+    .valid('development', 'test', 'production')
+    .default('development'),
+  // Comma separated list of browser origins allowed in addition to localhost
+  CORS_ORIGINS: Joi.string().allow('').default(''),
 
   // Platform
   PLATFORM_NAME: Joi.string().default('Steeze'),

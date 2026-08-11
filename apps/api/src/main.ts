@@ -14,13 +14,22 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix('api/v1');
 
-  // Enable CORS
+  // Enable CORS. Local dev origins are always allowed; deployed origins come
+  // from CORS_ORIGINS (comma separated) so they can change without a rebuild.
+  const localOrigins = [
+    'http://localhost:3000',
+    'http://localhost:4200',
+    'http://localhost:8100',
+    'capacitor://localhost',
+    'ionic://localhost',
+  ];
+  const configuredOrigins = (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:4200',
-      'http://localhost:8100',
-    ],
+    origin: [...localOrigins, ...configuredOrigins],
     credentials: true,
   });
 
