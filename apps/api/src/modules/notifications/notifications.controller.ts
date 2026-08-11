@@ -1,6 +1,9 @@
 import {
   Controller,
   Get,
+  Post,
+  Delete,
+  Body,
   Patch,
   Param,
   Query,
@@ -14,7 +17,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
-import { ListNotificationsDto } from './dto';
+import { ListNotificationsDto, RegisterDeviceDto } from './dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
@@ -34,7 +37,7 @@ export class NotificationsController {
     description: 'Returns paginated list of notifications',
   })
   async findAll(
-    @CurrentUser('sub') userId: string,
+    @CurrentUser('id') userId: string,
     @Query() dto: ListNotificationsDto,
   ) {
     return this.notificationsService.findAll(userId, dto);
@@ -52,7 +55,7 @@ export class NotificationsController {
       },
     },
   })
-  async getUnreadCount(@CurrentUser('sub') userId: string) {
+  async getUnreadCount(@CurrentUser('id') userId: string) {
     return this.notificationsService.getUnreadCount(userId);
   }
 
@@ -64,7 +67,7 @@ export class NotificationsController {
   })
   async markAsRead(
     @Param('id') id: string,
-    @CurrentUser('sub') userId: string,
+    @CurrentUser('id') userId: string,
   ) {
     return this.notificationsService.markAsRead(id, userId);
   }
@@ -75,7 +78,27 @@ export class NotificationsController {
     status: 200,
     description: 'All notifications marked as read',
   })
-  async markAllAsRead(@CurrentUser('sub') userId: string) {
+  async markAllAsRead(@CurrentUser('id') userId: string) {
     return this.notificationsService.markAllAsRead(userId);
+  }
+
+  @Post('devices')
+  @ApiOperation({ summary: 'Register a device for push notifications' })
+  @ApiResponse({ status: 201, description: 'Device registered' })
+  async registerDevice(
+    @CurrentUser('id') userId: string,
+    @Body() dto: RegisterDeviceDto,
+  ) {
+    return this.notificationsService.registerDevice(userId, dto);
+  }
+
+  @Delete('devices/:token')
+  @ApiOperation({ summary: 'Unregister a device from push notifications' })
+  @ApiResponse({ status: 200, description: 'Device unregistered' })
+  async unregisterDevice(
+    @CurrentUser('id') userId: string,
+    @Param('token') token: string,
+  ) {
+    return this.notificationsService.unregisterDevice(userId, token);
   }
 }

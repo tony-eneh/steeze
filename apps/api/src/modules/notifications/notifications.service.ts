@@ -1,21 +1,46 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NotificationType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateNotificationDto, ListNotificationsDto } from './dto';
+import { MailService } from '../mail/mail.service';
+import { notificationEmail } from '../mail/mail.templates';
+import { PushService } from './push.service';
+import {
+  CreateNotificationDto,
+  ListNotificationsDto,
+  RegisterDeviceDto,
+} from './dto';
+
+// Order and payment events are worth an email; the rest stay in-app and push.
+const EMAILED_TYPES: NotificationType[] = [
+  NotificationType.ORDER_UPDATE,
+  NotificationType.PAYMENT_UPDATE,
+  NotificationType.RETURN_UPDATE,
+];
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(NotificationsService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+    private readonly pushService: PushService,
+    private readonly config: ConfigService,
+  ) {}
 
   /**
-   * Create a new notification
+   * Create a new notification and fan it out to push and email. Delivery
+   * failures are logged rather than thrown: the in-app record is the source of
+   * truth and the caller is usually mid order-transition.
    */
   async create(dto: CreateNotificationDto) {
-    return this.prisma.notification.create({
+    const notification = await this.prisma.notification.create({
       data: {
         userId: dto.userId,
         type: dto.type,
@@ -24,6 +49,84 @@ export class NotificationsService {
         data: dto.data || {},
       },
     });
+
+    await this.dispatch(notification.id, dto);
+
+    return notification;
+  }
+
+  private async dispatch(notificationId: string, dto: CreateNotificationDto) {
+    const data = (dto.data ?? {}) as Record<string, unknown>;
+
+    try {
+      await this.pushService.sendToUser(dto.userId, {
+        title: dto.title,
+        body: dto.body,
+        data: {
+          notificationId,
+          type: dto.type,
+          ...Object.fromEntries(
+            Object.entries(data).map(([key, value]) => [key, String(value)]),
+          ),
+        },
+      });
+    } catch (error) {
+      this.logger.warn(`Push dispatch failed: ${describe(error)}`);
+    }
+
+    if (!EMAILED_TYPES.includes(dto.type)) {
+      return;
+    }
+
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: dto.userId },
+        select: { email: true },
+      });
+
+      if (!user) {
+        return;
+      }
+
+      const orderId = typeof data.orderId === 'string' ? data.orderId : null;
+      const platformUrl = (
+        this.config.get<string>('PLATFORM_URL') ?? 'https://steeze.com'
+      ).replace(/\/$/, '');
+
+      const { subject, html } = notificationEmail({
+        platformName: this.config.get<string>('PLATFORM_NAME') ?? 'Steeze',
+        title: dto.title,
+        body: dto.body,
+        actionUrl: orderId ? `${platformUrl}/orders/${orderId}` : undefined,
+      });
+
+      await this.mailService.send({ to: user.email, subject, html });
+    } catch (error) {
+      this.logger.warn(`Email dispatch failed: ${describe(error)}`);
+    }
+  }
+
+  /**
+   * Register (or refresh) a device token for push delivery. Tokens move
+   * between accounts when a device is handed over, so an existing token is
+   * reassigned rather than rejected.
+   */
+  async registerDevice(userId: string, dto: RegisterDeviceDto) {
+    const device = await this.prisma.deviceToken.upsert({
+      where: { token: dto.token },
+      update: { userId, platform: dto.platform, lastSeenAt: new Date() },
+      create: { userId, token: dto.token, platform: dto.platform },
+    });
+
+    return { id: device.id, platform: device.platform };
+  }
+
+  async unregisterDevice(userId: string, token: string) {
+    const result = await this.prisma.deviceToken.deleteMany({
+      where: { token, userId },
+    });
+
+    return { removed: result.count };
   }
 
   /**
@@ -268,4 +371,8 @@ export class NotificationsService {
       data: data || {},
     });
   }
+}
+
+function describe(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
