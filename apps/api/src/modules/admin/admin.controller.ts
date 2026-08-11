@@ -125,7 +125,7 @@ export class AdminController {
   async updateSetting(
     @Param('key') key: string,
     @Body() dto: UpdatePlatformSettingDto,
-    @CurrentUser('sub') adminId: string,
+    @CurrentUser('id') adminId: string,
   ) {
     return this.adminService.updateSetting(key, dto, adminId);
   }
