@@ -86,6 +86,36 @@ pnpm --filter api exec prisma migrate deploy
 
 ---
 
+## Vercel projects (landing and admin)
+
+Both are Vercel projects in the `tonyenehs-projects` scope, auto-deploying from
+`main`:
+
+| Project | Root Directory | Build command | Output |
+|---------|----------------|---------------|--------|
+| `steeze-landing` | `apps/landing` | `npx ng build --configuration production` | `dist/landing/browser` |
+| `steeze-admin` | `apps/admin` | `npx ng build --configuration production` | `dist/admin/browser` |
+
+**Pin the package manager.** Vercel resolves each project's Root Directory as
+the project root when detecting a package manager. Because that directory has
+no `pnpm-lock.yaml`, detection falls back to pnpm 6.35.1, which the root
+`engines.pnpm` field (`>=9.0.0`) rejects, and every deploy dies at install in
+about three seconds. Both projects therefore set:
+
+```
+ENABLE_EXPERIMENTAL_COREPACK=1
+```
+
+which makes Corepack honour `packageManager: "pnpm@9.15.9"` from the root
+`package.json`. Do not add per-app `package-lock.json` files: an npm lockfile
+inside the pnpm workspace reintroduces the same ambiguity.
+
+`steeze-admin` has Vercel Deployment Protection enabled, so its URLs answer
+`302` to `vercel.com/sso-api` for anyone outside the Vercel team. That is a
+project setting under Settings → Deployment Protection, not a build problem.
+
+---
+
 ## Landing (Angular SSR)
 
 ```bash
