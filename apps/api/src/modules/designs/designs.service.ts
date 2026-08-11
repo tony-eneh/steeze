@@ -10,6 +10,7 @@ import { UpdateDesignDto } from './dto/update-design.dto';
 import { CreateFabricOptionDto } from './dto/create-fabric-option.dto';
 import { CreateAddOnDto } from './dto/create-addon.dto';
 import { CreateSizePricingDto } from './dto/create-size-pricing.dto';
+import { AddDesignImageDto } from './dto/add-design-image.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 @Injectable()
@@ -396,6 +397,93 @@ export class DesignsService {
     });
 
     return { success: true, message: 'Size pricing deleted successfully' };
+  }
+
+  // ===== Images =====
+
+  async addImage(userId: string, designId: string, dto: AddDesignImageDto) {
+    await this.checkOwnership(userId, designId);
+
+    const existing = await this.prisma.designImage.count({
+      where: { designId },
+    });
+
+    // The first image uploaded becomes the catalog thumbnail unless the
+    // designer says otherwise.
+    const isPrimary = dto.isPrimary ?? existing === 0;
+
+    return this.prisma.$transaction(async (tx) => {
+      if (isPrimary) {
+        await tx.designImage.updateMany({
+          where: { designId },
+          data: { isPrimary: false },
+        });
+      }
+
+      return tx.designImage.create({
+        data: {
+          designId,
+          url: dto.url,
+          altText: dto.altText,
+          sortOrder: dto.sortOrder ?? existing,
+          isPrimary,
+        },
+      });
+    });
+  }
+
+  async setPrimaryImage(userId: string, designId: string, imageId: string) {
+    await this.checkOwnership(userId, designId);
+    await this.findImageOrThrow(designId, imageId);
+
+    await this.prisma.$transaction([
+      this.prisma.designImage.updateMany({
+        where: { designId },
+        data: { isPrimary: false },
+      }),
+      this.prisma.designImage.update({
+        where: { id: imageId },
+        data: { isPrimary: true },
+      }),
+    ]);
+
+    return { success: true, message: 'Primary image updated' };
+  }
+
+  async removeImage(userId: string, designId: string, imageId: string) {
+    await this.checkOwnership(userId, designId);
+    const image = await this.findImageOrThrow(designId, imageId);
+
+    await this.prisma.designImage.delete({ where: { id: imageId } });
+
+    // Promote the next image so a design is never left without a thumbnail.
+    if (image.isPrimary) {
+      const next = await this.prisma.designImage.findFirst({
+        where: { designId },
+        orderBy: { sortOrder: 'asc' },
+      });
+
+      if (next) {
+        await this.prisma.designImage.update({
+          where: { id: next.id },
+          data: { isPrimary: true },
+        });
+      }
+    }
+
+    return { success: true, message: 'Image deleted successfully' };
+  }
+
+  private async findImageOrThrow(designId: string, imageId: string) {
+    const image = await this.prisma.designImage.findUnique({
+      where: { id: imageId },
+    });
+
+    if (!image || image.designId !== designId) {
+      throw new NotFoundException('Image not found on this design');
+    }
+
+    return image;
   }
 
   // Helper method to check ownership

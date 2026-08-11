@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { HealthModule } from './modules/health/health.module';
 import { MailModule } from './modules/mail/mail.module';
+import { MediaModule } from './modules/media/media.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { DesignersModule } from './modules/designers/designers.module';
@@ -39,6 +40,7 @@ import { configValidationSchema } from './config/env.validation';
     UsersModule,
     DesignersModule,
     DesignsModule,
+    MediaModule,
     OrdersModule,
     MeasurementsModule,
     PaymentsModule,

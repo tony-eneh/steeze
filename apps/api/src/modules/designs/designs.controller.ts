@@ -22,6 +22,7 @@ import { UpdateDesignDto } from './dto/update-design.dto';
 import { CreateFabricOptionDto } from './dto/create-fabric-option.dto';
 import { CreateAddOnDto } from './dto/create-addon.dto';
 import { CreateSizePricingDto } from './dto/create-size-pricing.dto';
+import { AddDesignImageDto } from './dto/add-design-image.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -130,6 +131,57 @@ export class DesignsController {
   @ApiResponse({ status: 200, description: 'Design deleted' })
   async remove(@CurrentUser() user: any, @Param('id') id: string) {
     return this.designsService.remove(user.id, id);
+  }
+
+  // Images
+  @Post(':id/images')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.DESIGNER)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Attach an uploaded image to a design',
+    description: 'Upload the file via POST /media/upload first, then pass the returned URL here.',
+  })
+  @ApiResponse({ status: 201, description: 'Image attached' })
+  async addImage(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body() addImageDto: AddDesignImageDto,
+  ) {
+    const image = await this.designsService.addImage(user.id, id, addImageDto);
+    return {
+      success: true,
+      data: image,
+      message: 'Image added successfully',
+    };
+  }
+
+  @Patch(':id/images/:imageId/primary')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.DESIGNER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Make an image the design thumbnail' })
+  @ApiResponse({ status: 200, description: 'Primary image updated' })
+  async setPrimaryImage(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+  ) {
+    return this.designsService.setPrimaryImage(user.id, id, imageId);
+  }
+
+  @Delete(':id/images/:imageId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.DESIGNER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Remove an image from a design' })
+  @ApiResponse({ status: 200, description: 'Image deleted' })
+  async removeImage(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+  ) {
+    return this.designsService.removeImage(user.id, id, imageId);
   }
 
   // Fabric Options
