@@ -44,4 +44,4 @@ ENV PORT=3000
 
 EXPOSE 3000
 
-CMD ["node", "apps/api/dist/src/main.js"]
+CMD ["sh", "-c", "cd apps/api && ./node_modules/.bin/prisma migrate deploy && node dist/src/main.js"]
