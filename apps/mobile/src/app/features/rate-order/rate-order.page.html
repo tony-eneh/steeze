@@ -8,15 +8,33 @@
   <ion-card>
     <ion-card-header>
       <ion-card-title>How was your experience?</ion-card-title>
+      <ion-card-subtitle>
+        Ratings unlock once an order is confirmed, and you can leave one only
+        once.
+      </ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      <ion-range min="1" max="5" step="1" [(ngModel)]="score"></ion-range>
+      <ion-range min="1" max="5" step="1" snaps [(ngModel)]="score"></ion-range>
       <p class="score">Score: {{ score }} / 5</p>
       <ion-item>
         <ion-label position="stacked">Comment</ion-label>
-        <ion-textarea [(ngModel)]="comment"></ion-textarea>
+        <ion-textarea
+          [(ngModel)]="comment"
+          placeholder="Optional, max 500 characters"
+          maxlength="500"
+        ></ion-textarea>
       </ion-item>
-      <ion-button class="primary" expand="block">Submit rating</ion-button>
+
+      <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+
+      <ion-button
+        class="primary"
+        expand="block"
+        [disabled]="isSubmitting"
+        (click)="submit()"
+      >
+        {{ isSubmitting ? 'Submitting...' : 'Submit rating' }}
+      </ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>

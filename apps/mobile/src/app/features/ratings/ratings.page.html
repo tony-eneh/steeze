@@ -5,12 +5,38 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card>
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading your ratings...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="!isLoading && ratings.length">
     <ion-card-header>
       <ion-card-title>Your ratings</ion-card-title>
+      <ion-card-subtitle>
+        {{ average }} average across {{ ratings.length }} rated
+        {{ ratings.length === 1 ? 'order' : 'orders' }}
+      </ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      Ratings for completed orders appear here.
+      <ion-list>
+        <ion-item *ngFor="let rating of ratings">
+          <ion-label class="ion-text-wrap">
+            <h3>{{ stars(rating.score) }}</h3>
+            <p>{{ rating.comment || 'No comment left' }}</p>
+          </ion-label>
+          <ion-note slot="end">{{ rating.createdAt | date }}</ion-note>
+        </ion-item>
+      </ion-list>
     </ion-card-content>
   </ion-card>
+
+  <app-empty-state
+    *ngIf="!isLoading && !ratings.length && !errorMessage"
+    title="No ratings yet"
+    message="Ratings appear once an order you were part of is confirmed."
+  ></app-empty-state>
 </ion-content>

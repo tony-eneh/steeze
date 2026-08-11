@@ -58,24 +58,42 @@
     </ion-card>
 
     <div class="actions">
-      <ion-button class="primary" expand="block" (click)="confirmOrder()">
+      <ion-button
+        *ngIf="canConfirm"
+        class="primary"
+        expand="block"
+        [disabled]="isSubmitting"
+        (click)="confirmOrder()"
+      >
         Confirm delivery
       </ion-button>
-      <ion-button fill="clear" [routerLink]="['/orders', order.id, 'rate']">
+      <ion-button
+        *ngIf="canRate"
+        fill="clear"
+        [routerLink]="['/orders', order.id, 'rate']"
+      >
         Rate this order
       </ion-button>
     </div>
 
-    <ion-card>
+    <ion-card *ngIf="canReturn">
       <ion-card-header>
         <ion-card-title>Request return</ion-card-title>
+        <ion-card-subtitle>
+          Available for 2 days after delivery
+        </ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <ion-textarea
-          placeholder="Reason for return"
+          placeholder="What is wrong with the order?"
           [(ngModel)]="returnReason"
         ></ion-textarea>
-        <ion-button class="secondary" expand="block" (click)="requestReturn()">
+        <ion-button
+          class="secondary"
+          expand="block"
+          [disabled]="isSubmitting"
+          (click)="requestReturn()"
+        >
           Submit return
         </ion-button>
       </ion-card-content>

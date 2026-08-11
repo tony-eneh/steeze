@@ -1,24 +1,45 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Notifications</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="unreadCount" (click)="markAllAsRead()">
+        Mark all read
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-item>
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading notifications...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ion-list *ngIf="!isLoading && notifications.length">
+    <ion-item
+      *ngFor="let notification of notifications"
+      button
+      (click)="open(notification)"
+    >
       <ion-label>
-        <h3>Order delivered</h3>
-        <p>Your order STZ-20260208-4192 has arrived.</p>
+        <h3>
+          {{ notification.title }}
+          <ion-badge *ngIf="!notification.isRead" color="primary">New</ion-badge>
+        </h3>
+        <p>{{ notification.body }}</p>
       </ion-label>
-      <ion-note slot="end">2h</ion-note>
-    </ion-item>
-    <ion-item>
-      <ion-label>
-        <h3>Designer update</h3>
-        <p>Maison Atelier marked your order as ready.</p>
-      </ion-label>
-      <ion-note slot="end">1d</ion-note>
+      <ion-note slot="end">
+        {{ notification.createdAt | date: 'short' }}
+      </ion-note>
     </ion-item>
   </ion-list>
+
+  <app-empty-state
+    *ngIf="!isLoading && !notifications.length && !errorMessage"
+    title="Nothing yet"
+    message="Order, payment and return updates will show up here."
+  ></app-empty-state>
 </ion-content>

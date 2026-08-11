@@ -5,11 +5,29 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card>
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading your profile...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="profile">
     <ion-card-header>
       <ion-card-title>Account</ion-card-title>
+      <ion-card-subtitle>{{ profile.email }}</ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
+      <ion-item *ngIf="!profile.isEmailVerified" lines="none">
+        <ion-label class="ion-text-wrap">
+          <p>
+            Your email is not verified yet. Check your inbox for the
+            confirmation link.
+          </p>
+        </ion-label>
+      </ion-item>
+
       <ion-item>
         <ion-label position="stacked">First name</ion-label>
         <ion-input [(ngModel)]="firstName"></ion-input>
@@ -20,9 +38,16 @@
       </ion-item>
       <ion-item>
         <ion-label position="stacked">Phone</ion-label>
-        <ion-input [(ngModel)]="phone"></ion-input>
+        <ion-input [(ngModel)]="phone" type="tel"></ion-input>
       </ion-item>
-      <ion-button class="primary" expand="block">Save changes</ion-button>
+      <ion-button
+        class="primary"
+        expand="block"
+        [disabled]="isSaving"
+        (click)="save()"
+      >
+        {{ isSaving ? 'Saving...' : 'Save changes' }}
+      </ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>

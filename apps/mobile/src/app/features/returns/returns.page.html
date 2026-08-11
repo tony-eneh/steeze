@@ -8,26 +8,79 @@
   <ion-card>
     <ion-card-header>
       <ion-card-title>Request a return</ion-card-title>
+      <ion-card-subtitle>
+        Available for 2 days after an order is delivered.
+      </ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      <ion-item>
-        <ion-label position="stacked">Order number</ion-label>
-        <ion-input [(ngModel)]="orderNumber"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-label position="stacked">Reason</ion-label>
-        <ion-textarea [(ngModel)]="reason"></ion-textarea>
-      </ion-item>
-      <ion-button class="primary" expand="block">Submit return</ion-button>
+      <p *ngIf="!eligibleOrders.length">
+        You have no delivered orders inside the return window.
+      </p>
+
+      <ng-container *ngIf="eligibleOrders.length">
+        <ion-item>
+          <ion-label position="stacked">Order</ion-label>
+          <ion-select
+            [(ngModel)]="selectedOrderId"
+            placeholder="Choose an order"
+          >
+            <ion-select-option
+              *ngFor="let order of eligibleOrders"
+              [value]="order.id"
+            >
+              {{ order.orderNumber }} · {{ order.design.title }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Reason</ion-label>
+          <ion-textarea
+            [(ngModel)]="reason"
+            placeholder="What is wrong with the order?"
+            maxlength="500"
+          ></ion-textarea>
+        </ion-item>
+        <ion-button
+          class="primary"
+          expand="block"
+          [disabled]="!selectedOrderId || isSubmitting"
+          (click)="submit()"
+        >
+          {{ isSubmitting ? 'Submitting...' : 'Submit return' }}
+        </ion-button>
+      </ng-container>
     </ion-card-content>
   </ion-card>
 
-  <ion-card>
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading your returns...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="!isLoading && returns.length">
     <ion-card-header>
       <ion-card-title>Return status</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      Approved return requests and courier updates will show here.
+      <ion-list>
+        <ion-item *ngFor="let item of returns">
+          <ion-label class="ion-text-wrap">
+            <h3>{{ item.order?.orderNumber || 'Return' }}</h3>
+            <p>{{ item.reason }}</p>
+            <p>Status: {{ item.status }}</p>
+          </ion-label>
+          <ion-note slot="end">{{ item.createdAt | date }}</ion-note>
+        </ion-item>
+      </ion-list>
     </ion-card-content>
   </ion-card>
+
+  <app-empty-state
+    *ngIf="!isLoading && !returns.length && !errorMessage"
+    title="No returns"
+    message="Returns you request will be tracked here."
+  ></app-empty-state>
 </ion-content>

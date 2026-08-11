@@ -8,13 +8,29 @@
   <ion-card>
     <ion-card-header>
       <ion-card-title>Link Open Tailor</ion-card-title>
+      <ion-card-subtitle>
+        Link once and your measurements are attached to every order.
+      </ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
+      <ion-item *ngIf="linkedEmail" lines="none">
+        <ion-label class="ion-text-wrap">
+          <p>Currently linked to {{ linkedEmail }}</p>
+        </ion-label>
+      </ion-item>
+
       <ion-item>
         <ion-label position="stacked">Open Tailor email</ion-label>
         <ion-input [(ngModel)]="openTailorEmail" type="email"></ion-input>
       </ion-item>
-      <ion-button class="primary" expand="block">Save link</ion-button>
+      <ion-button
+        class="primary"
+        expand="block"
+        [disabled]="isLinking || !openTailorEmail"
+        (click)="link()"
+      >
+        {{ isLinking ? 'Linking...' : linkedEmail ? 'Update link' : 'Save link' }}
+      </ion-button>
     </ion-card-content>
   </ion-card>
 
@@ -23,7 +39,20 @@
       <ion-card-title>Measurement summary</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      Measurements will appear here after syncing with Open Tailor.
+      <p *ngIf="isLoading">Loading measurements...</p>
+
+      <p *ngIf="!isLoading && !linkedEmail">
+        Link your Open Tailor email above to pull your measurements in.
+      </p>
+
+      <p *ngIf="!isLoading && fetchMessage">{{ fetchMessage }}</p>
+
+      <ion-list *ngIf="!isLoading && measurements">
+        <ion-item *ngFor="let entry of measurements | keyvalue">
+          <ion-label>{{ entry.key }}</ion-label>
+          <ion-note slot="end">{{ entry.value }}</ion-note>
+        </ion-item>
+      </ion-list>
     </ion-card-content>
   </ion-card>
 </ion-content>
