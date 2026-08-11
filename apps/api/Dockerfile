@@ -1,0 +1,44 @@
+# Steeze API Dockerfile
+FROM node:20-alpine AS base
+
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+
+FROM base AS builder
+WORKDIR /app
+
+# Copy workspace files
+COPY pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml* ./
+COPY turbo.json ./
+
+# Copy API app
+COPY apps/api/ ./apps/api/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Generate Prisma client
+RUN cd apps/api && pnpm exec prisma generate
+
+# Build API
+RUN pnpm --filter api build
+
+FROM base AS runner
+WORKDIR /app
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nestjs
+USER nestjs
+
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/apps/api/dist ./apps/api/dist
+COPY --from=builder --chown=nestjs:nodejs /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/apps/api/package.json ./apps/api/package.json
+COPY --from=builder --chown=nestjs:nodejs /app/apps/api/prisma ./apps/api/prisma
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 3000
+
+CMD ["node", "apps/api/dist/src/main.js"]
