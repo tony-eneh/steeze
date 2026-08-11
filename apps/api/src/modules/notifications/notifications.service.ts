@@ -100,7 +100,7 @@ export class NotificationsService {
         actionUrl: orderId ? `${platformUrl}/orders/${orderId}` : undefined,
       });
 
-      await this.mailService.send({ to: user.email, subject, html });
+      this.mailService.queue({ to: user.email, subject, html });
     } catch (error) {
       this.logger.warn(`Email dispatch failed: ${describe(error)}`);
     }

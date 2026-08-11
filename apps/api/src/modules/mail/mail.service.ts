@@ -10,6 +10,8 @@ export interface MailMessage {
   text?: string;
 }
 
+const SMTP_TIMEOUT_MS = 10_000;
+
 /**
  * SMTP delivery. When SMTP is not configured (local dev, CI) messages are
  * logged instead of sent so nothing in the calling code has to branch.
@@ -40,11 +42,25 @@ export class MailService implements OnModuleInit {
       port,
       secure: port === 465,
       auth: { user, pass },
+      // Without these, an unreachable SMTP host holds the socket open for
+      // minutes. Nothing about sending mail should ever take that long.
+      connectionTimeout: SMTP_TIMEOUT_MS,
+      greetingTimeout: SMTP_TIMEOUT_MS,
+      socketTimeout: SMTP_TIMEOUT_MS,
     });
   }
 
   get isConfigured(): boolean {
     return this.transporter !== null;
+  }
+
+  /**
+   * Sends without making the caller wait. Use this on request paths: a user
+   * registering should not block on an SMTP handshake, and a delivery failure
+   * is not a reason to fail their request.
+   */
+  queue(message: MailMessage): void {
+    void this.send(message);
   }
 
   async send(message: MailMessage): Promise<boolean> {

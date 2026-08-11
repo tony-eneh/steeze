@@ -217,7 +217,7 @@ export class AuthService {
       expiresInMinutes: PASSWORD_RESET_TTL_MINUTES,
     });
 
-    await this.mailService.send({ to: user.email, subject, html });
+    this.mailService.queue({ to: user.email, subject, html });
 
     return genericResponse;
   }
@@ -282,7 +282,7 @@ export class AuthService {
       expiresInHours: EMAIL_VERIFICATION_TTL_HOURS,
     });
 
-    await this.mailService.send({ to: user.email, subject, html });
+    this.mailService.queue({ to: user.email, subject, html });
 
     return { message: 'Verification email sent' };
   }

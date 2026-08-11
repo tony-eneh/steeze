@@ -31,7 +31,9 @@ describe('AuthService', () => {
     $transaction: jest.fn(),
   };
 
-  const mailMock = { send: jest.fn() };
+  // The service queues mail rather than awaiting it, so requests never block
+  // on an SMTP handshake.
+  const mailMock = { send: jest.fn(), queue: jest.fn() };
 
   const configMock = {
     get: jest.fn((key: string) =>
@@ -43,6 +45,7 @@ describe('AuthService', () => {
     jest.clearAllMocks();
     prismaMock.$transaction.mockResolvedValue([]);
     mailMock.send.mockResolvedValue(true);
+    mailMock.queue.mockReturnValue(undefined);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -69,7 +72,7 @@ describe('AuthService', () => {
       expect(result.message).toBe(
         'If the email exists, a reset link has been sent',
       );
-      expect(mailMock.send).not.toHaveBeenCalled();
+      expect(mailMock.queue).not.toHaveBeenCalled();
       expect(prismaMock.passwordResetToken.create).not.toHaveBeenCalled();
     });
 
@@ -86,7 +89,7 @@ describe('AuthService', () => {
       expect(result.message).toBe(
         'If the email exists, a reset link has been sent',
       );
-      expect(mailMock.send).toHaveBeenCalledTimes(1);
+      expect(mailMock.queue).toHaveBeenCalledTimes(1);
     });
 
     it('stores only the hash of the emailed token', async () => {
@@ -99,7 +102,7 @@ describe('AuthService', () => {
 
       await service.forgotPassword('someone@example.com');
 
-      const emailedLink = mailMock.send.mock.calls[0][0].html as string;
+      const emailedLink = mailMock.queue.mock.calls[0][0].html as string;
       const emailedToken = /token=([a-f0-9]+)/.exec(emailedLink)?.[1];
       const stored = prismaMock.passwordResetToken.create.mock.calls[0][0].data;
 
@@ -135,7 +138,7 @@ describe('AuthService', () => {
 
       await service.forgotPassword('someone@example.com');
 
-      expect(mailMock.send).not.toHaveBeenCalled();
+      expect(mailMock.queue).not.toHaveBeenCalled();
     });
   });
 
@@ -259,7 +262,7 @@ describe('AuthService', () => {
       const result = await service.sendEmailVerification('user-1');
 
       expect(result.message).toBe('Email is already verified');
-      expect(mailMock.send).not.toHaveBeenCalled();
+      expect(mailMock.queue).not.toHaveBeenCalled();
     });
   });
 });
