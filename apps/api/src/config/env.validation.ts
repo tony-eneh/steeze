@@ -34,6 +34,8 @@ export const configValidationSchema = Joi.object({
   PAYSTACK_SECRET_KEY: Joi.string().optional(),
   PAYSTACK_PUBLIC_KEY: Joi.string().optional(),
   PAYSTACK_WEBHOOK_SECRET: Joi.string().optional(),
+  // Where Paystack returns the customer after checkout
+  PAYMENT_CALLBACK_URL: Joi.string().optional(),
 
   // Cloudinary
   CLOUDINARY_CLOUD_NAME: Joi.string().optional(),

@@ -44,6 +44,24 @@ export class PaystackService {
       this.configService.get<string>('PAYSTACK_WEBHOOK_SECRET') || '';
   }
 
+  /**
+   * Where Paystack sends the customer once checkout finishes. Set
+   * PAYMENT_CALLBACK_URL to point at whichever client handles the return.
+   */
+  private get callbackUrl(): string {
+    const configured = this.configService.get<string>('PAYMENT_CALLBACK_URL');
+
+    if (configured) {
+      return configured;
+    }
+
+    const platformUrl = (
+      this.configService.get<string>('PLATFORM_URL') ?? 'https://steeze.com'
+    ).replace(/\/$/, '');
+
+    return `${platformUrl}/payment/callback`;
+  }
+
   async initializeTransaction(
     email: string,
     amount: number,
@@ -59,9 +77,7 @@ export class PaystackService {
             amount: Math.round(amount * 100), // Convert to kobo
             reference,
             metadata,
-            callback_url:
-              this.configService.get<string>('PLATFORM_URL') +
-              '/payment/callback',
+            callback_url: this.callbackUrl,
           },
           {
             headers: {

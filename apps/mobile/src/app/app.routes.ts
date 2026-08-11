@@ -110,6 +110,13 @@ export const routes: Routes = [
       import('./features/payment/payment.page').then((m) => m.PaymentPage)
   },
   {
+    // Where Paystack returns the customer after checkout.
+    path: 'payment/callback',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/payment/payment.page').then((m) => m.PaymentPage)
+  },
+  {
     path: 'measurements',
     canActivate: [authGuard],
     loadComponent: () =>

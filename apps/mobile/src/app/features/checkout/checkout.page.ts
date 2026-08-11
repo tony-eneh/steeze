@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-checkout',
@@ -13,9 +13,16 @@ import { Router, RouterModule } from '@angular/router';
 export class CheckoutPage {
   selectedAddress = 'home';
 
-  constructor(private readonly router: Router) {}
+  constructor(
+    private readonly router: Router,
+    private readonly route: ActivatedRoute
+  ) {}
 
   proceedToPayment(): void {
-    this.router.navigateByUrl('/payment');
+    const orderId = this.route.snapshot.queryParamMap.get('orderId');
+
+    void this.router.navigate(['/payment'], {
+      queryParams: orderId ? { orderId } : {}
+    });
   }
 }

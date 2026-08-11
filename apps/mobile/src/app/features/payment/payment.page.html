@@ -5,13 +5,63 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card>
+  <ion-card *ngIf="state === 'starting'">
+    <ion-card-content class="status">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Setting up your secure checkout…</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="state === 'awaiting'">
     <ion-card-header>
-      <ion-card-title>Paystack checkout</ion-card-title>
+      <ion-card-title>Continue to Paystack</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      The payment WebView will load here. Once successful, you will return to
-      your order details.
+      <p>
+        You are being taken to Paystack to complete payment. You will return
+        here automatically once it is done.
+      </p>
+      <ion-button expand="block" (click)="openCheckout()">
+        Open checkout
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="state === 'verifying'">
+    <ion-card-content class="status">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Confirming your payment…</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="state === 'success'">
+    <ion-card-header>
+      <ion-card-title>Payment received</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>
+        Your funds are held securely until you confirm you are happy with the
+        delivered order.
+      </p>
+      <p class="reference">Reference: {{ reference }}</p>
+      <ion-button expand="block" (click)="goToOrders()">
+        View my orders
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="state === 'failed'">
+    <ion-card-header>
+      <ion-card-title>Payment not completed</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{ errorMessage }}</p>
+      <ion-button expand="block" fill="outline" (click)="start()">
+        Try again
+      </ion-button>
+      <ion-button expand="block" fill="clear" (click)="goToOrders()">
+        Back to orders
+      </ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>
