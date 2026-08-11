@@ -45,7 +45,7 @@ export class ReturnsController {
     @Body() createReturnRequestDto: CreateReturnRequestDto,
   ) {
     const returnRequest = await this.returnsService.createReturnRequest(
-      user.sub,
+      user.id,
       orderId,
       createReturnRequestDto,
     );
@@ -105,7 +105,7 @@ export class ReturnsController {
   ) {
     const returnRequest = await this.returnsService.approve(
       id,
-      user.sub,
+      user.id,
       updateDto,
     );
     return {
@@ -128,7 +128,7 @@ export class ReturnsController {
   ) {
     const returnRequest = await this.returnsService.reject(
       id,
-      user.sub,
+      user.id,
       updateDto,
     );
     return {
@@ -153,7 +153,7 @@ export class ReturnsController {
   ) {
     const returnRequest = await this.returnsService.markPickupDispatched(
       id,
-      user.sub,
+      user.id,
       updateDto,
     );
     return {
@@ -179,7 +179,7 @@ export class ReturnsController {
   ) {
     const returnRequest = await this.returnsService.markReturned(
       id,
-      user.sub,
+      user.id,
       updateDto,
     );
     return {

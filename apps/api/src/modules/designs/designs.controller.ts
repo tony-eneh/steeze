@@ -44,7 +44,7 @@ export class DesignsController {
     @CurrentUser() user: any,
     @Body() createDesignDto: CreateDesignDto,
   ) {
-    const design = await this.designsService.create(user.sub, createDesignDto);
+    const design = await this.designsService.create(user.id, createDesignDto);
     return {
       success: true,
       data: design,
@@ -111,7 +111,7 @@ export class DesignsController {
     @Body() updateDesignDto: UpdateDesignDto,
   ) {
     const design = await this.designsService.update(
-      user.sub,
+      user.id,
       id,
       updateDesignDto,
     );
@@ -129,7 +129,7 @@ export class DesignsController {
   @ApiOperation({ summary: 'Delete design (designer only)' })
   @ApiResponse({ status: 200, description: 'Design deleted' })
   async remove(@CurrentUser() user: any, @Param('id') id: string) {
-    return this.designsService.remove(user.sub, id);
+    return this.designsService.remove(user.id, id);
   }
 
   // Fabric Options
@@ -145,7 +145,7 @@ export class DesignsController {
     @Body() createFabricDto: CreateFabricOptionDto,
   ) {
     const fabric = await this.designsService.addFabricOption(
-      user.sub,
+      user.id,
       id,
       createFabricDto,
     );
@@ -169,7 +169,7 @@ export class DesignsController {
     @Body() updateDto: Partial<CreateFabricOptionDto>,
   ) {
     const fabric = await this.designsService.updateFabricOption(
-      user.sub,
+      user.id,
       id,
       fabricId,
       updateDto,
@@ -192,7 +192,7 @@ export class DesignsController {
     @Param('id') id: string,
     @Param('fabricId') fabricId: string,
   ) {
-    return this.designsService.removeFabricOption(user.sub, id, fabricId);
+    return this.designsService.removeFabricOption(user.id, id, fabricId);
   }
 
   // Add-ons
@@ -208,7 +208,7 @@ export class DesignsController {
     @Body() createAddOnDto: CreateAddOnDto,
   ) {
     const addOn = await this.designsService.addAddOn(
-      user.sub,
+      user.id,
       id,
       createAddOnDto,
     );
@@ -232,7 +232,7 @@ export class DesignsController {
     @Body() updateDto: Partial<CreateAddOnDto>,
   ) {
     const addOn = await this.designsService.updateAddOn(
-      user.sub,
+      user.id,
       id,
       addonId,
       updateDto,
@@ -255,7 +255,7 @@ export class DesignsController {
     @Param('id') id: string,
     @Param('addonId') addonId: string,
   ) {
-    return this.designsService.removeAddOn(user.sub, id, addonId);
+    return this.designsService.removeAddOn(user.id, id, addonId);
   }
 
   // Size Pricing
@@ -271,7 +271,7 @@ export class DesignsController {
     @Body() createSizePricingDto: CreateSizePricingDto,
   ) {
     const sizePricing = await this.designsService.addSizePricing(
-      user.sub,
+      user.id,
       id,
       createSizePricingDto,
     );
@@ -295,7 +295,7 @@ export class DesignsController {
     @Body() updateDto: Partial<CreateSizePricingDto>,
   ) {
     const sizePricing = await this.designsService.updateSizePricing(
-      user.sub,
+      user.id,
       id,
       pricingId,
       updateDto,
@@ -318,6 +318,6 @@ export class DesignsController {
     @Param('id') id: string,
     @Param('pricingId') pricingId: string,
   ) {
-    return this.designsService.removeSizePricing(user.sub, id, pricingId);
+    return this.designsService.removeSizePricing(user.id, id, pricingId);
   }
 }

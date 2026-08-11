@@ -89,7 +89,7 @@ export class DesignersController {
     @Body() updateDto: UpdateDesignerProfileDto,
   ) {
     const designer = await this.designersService.updateMyProfile(
-      user.sub,
+      user.id,
       updateDto,
     );
     return {
@@ -114,7 +114,7 @@ export class DesignersController {
     @Query('status') status?: string,
   ) {
     const result = await this.designersService.getMyOrders(
-      user.sub,
+      user.id,
       paginationDto,
       status,
     );
@@ -132,7 +132,7 @@ export class DesignersController {
   @ApiOperation({ summary: 'Get earnings summary (designer only)' })
   @ApiResponse({ status: 200, description: 'Earnings retrieved' })
   async getMyEarnings(@CurrentUser() user: any) {
-    const earnings = await this.designersService.getMyEarnings(user.sub);
+    const earnings = await this.designersService.getMyEarnings(user.id);
     return {
       success: true,
       data: earnings,

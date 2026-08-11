@@ -40,7 +40,7 @@ export class OrdersController {
     @CurrentUser() user: any,
     @Body() createOrderDto: CreateOrderDto,
   ) {
-    const order = await this.ordersService.create(user.sub, createOrderDto);
+    const order = await this.ordersService.create(user.id, createOrderDto);
     return {
       success: true,
       data: order,
@@ -62,7 +62,7 @@ export class OrdersController {
     @Query('status') status?: string,
   ) {
     const result = await this.ordersService.findAll(
-      user.sub,
+      user.id,
       user.role,
       paginationDto,
       status,
@@ -80,7 +80,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Get order detail' })
   @ApiResponse({ status: 200, description: 'Order retrieved' })
   async findOne(@CurrentUser() user: any, @Param('id') id: string) {
-    const order = await this.ordersService.findOne(id, user.sub);
+    const order = await this.ordersService.findOne(id, user.id);
     return {
       success: true,
       data: order,
@@ -99,7 +99,7 @@ export class OrdersController {
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
-    const order = await this.ordersService.acceptOrder(user.sub, id, updateDto);
+    const order = await this.ordersService.acceptOrder(user.id, id, updateDto);
     return {
       success: true,
       data: order,
@@ -118,7 +118,7 @@ export class OrdersController {
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
-    const order = await this.ordersService.rejectOrder(user.sub, id, updateDto);
+    const order = await this.ordersService.rejectOrder(user.id, id, updateDto);
     return {
       success: true,
       data: order,
@@ -138,7 +138,7 @@ export class OrdersController {
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
     const order = await this.ordersService.markInProgress(
-      user.sub,
+      user.id,
       id,
       updateDto,
     );
@@ -160,7 +160,7 @@ export class OrdersController {
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
-    const order = await this.ordersService.markReady(user.sub, id, updateDto);
+    const order = await this.ordersService.markReady(user.id, id, updateDto);
     return {
       success: true,
       data: order,
@@ -234,7 +234,7 @@ export class OrdersController {
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
     const order = await this.ordersService.confirmOrder(
-      user.sub,
+      user.id,
       id,
       updateDto,
     );
@@ -256,7 +256,7 @@ export class OrdersController {
     @Param('id') id: string,
     @Body() updateDto: UpdateOrderStatusDto,
   ) {
-    const order = await this.ordersService.cancelOrder(user.sub, id, updateDto);
+    const order = await this.ordersService.cancelOrder(user.id, id, updateDto);
     return {
       success: true,
       data: order,
@@ -270,7 +270,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Get order status history' })
   @ApiResponse({ status: 200, description: 'Status history retrieved' })
   async getStatusHistory(@CurrentUser() user: any, @Param('id') id: string) {
-    const history = await this.ordersService.getStatusHistory(id, user.sub);
+    const history = await this.ordersService.getStatusHistory(id, user.id);
     return {
       success: true,
       data: history,

@@ -32,7 +32,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get own profile' })
   @ApiResponse({ status: 200, description: 'User profile retrieved' })
   async getMe(@CurrentUser() user: any) {
-    const userData = await this.usersService.findById(user.sub);
+    const userData = await this.usersService.findById(user.id);
     return {
       success: true,
       data: userData,
@@ -50,7 +50,7 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     const userData = await this.usersService.updateProfile(
-      user.sub,
+      user.id,
       updateUserDto,
     );
     return {
@@ -79,7 +79,7 @@ export class UsersController {
   @ApiOperation({ summary: 'List own addresses' })
   @ApiResponse({ status: 200, description: 'Addresses retrieved' })
   async getAddresses(@CurrentUser() user: any) {
-    const addresses = await this.usersService.getAddresses(user.sub);
+    const addresses = await this.usersService.getAddresses(user.id);
     return {
       success: true,
       data: addresses,
@@ -97,7 +97,7 @@ export class UsersController {
     @Body() createAddressDto: CreateAddressDto,
   ) {
     const address = await this.usersService.createAddress(
-      user.sub,
+      user.id,
       createAddressDto,
     );
     return {
@@ -118,7 +118,7 @@ export class UsersController {
     @Body() updateAddressDto: UpdateAddressDto,
   ) {
     const address = await this.usersService.updateAddress(
-      user.sub,
+      user.id,
       id,
       updateAddressDto,
     );
@@ -135,6 +135,6 @@ export class UsersController {
   @ApiOperation({ summary: 'Delete an address' })
   @ApiResponse({ status: 200, description: 'Address deleted' })
   async deleteAddress(@CurrentUser() user: any, @Param('id') id: string) {
-    return this.usersService.deleteAddress(user.sub, id);
+    return this.usersService.deleteAddress(user.id, id);
   }
 }

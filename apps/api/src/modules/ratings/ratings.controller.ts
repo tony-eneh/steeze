@@ -39,7 +39,7 @@ export class RatingsController {
     @Body() createRatingDto: CreateRatingDto,
   ) {
     const rating = await this.ratingsService.createRating(
-      user.sub,
+      user.id,
       orderId,
       createRatingDto,
     );
@@ -83,7 +83,7 @@ export class RatingsController {
   ) {
     const ratings = await this.ratingsService.getRatingsForOrder(
       orderId,
-      user.sub,
+      user.id,
     );
     return {
       success: true,

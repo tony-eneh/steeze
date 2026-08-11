@@ -29,7 +29,7 @@ export class MeasurementsController {
     @Body() linkDto: LinkOpenTailorDto,
   ) {
     const result = await this.measurementsService.linkOpenTailorEmail(
-      user.sub,
+      user.id,
       linkDto,
     );
     return {
@@ -46,7 +46,7 @@ export class MeasurementsController {
   @ApiResponse({ status: 200, description: 'Measurements retrieved' })
   async getMyMeasurements(@CurrentUser() user: any) {
     const measurements = await this.measurementsService.getMyMeasurements(
-      user.sub,
+      user.id,
     );
     return {
       success: true,
@@ -65,7 +65,7 @@ export class MeasurementsController {
     @Body() createDto: CreateMeasurementDto,
   ) {
     const measurement = await this.measurementsService.createMeasurement(
-      user.sub,
+      user.id,
       createDto,
     );
     return {
@@ -85,7 +85,7 @@ export class MeasurementsController {
     @Body() updateDto: UpdateMeasurementDto,
   ) {
     const measurement = await this.measurementsService.updateMeasurement(
-      user.sub,
+      user.id,
       updateDto,
     );
     return {
