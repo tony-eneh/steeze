@@ -8,6 +8,8 @@ import {
   Req,
   Headers,
 } from '@nestjs/common';
+import type { RawBodyRequest } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import {
   ApiTags,
   ApiOperation,
@@ -43,14 +45,16 @@ export class PaymentsController {
   }
 
   @Post('webhook')
+  @SkipThrottle()
   @ApiOperation({ summary: 'Paystack webhook endpoint' })
   @ApiResponse({ status: 200, description: 'Webhook processed' })
   async handleWebhook(
     @Headers('x-paystack-signature') signature: string,
-    @Req() req: Request,
+    @Req() req: RawBodyRequest<Request>,
   ) {
-    // Get raw body for signature verification
-    const payload = JSON.stringify(req.body);
+    // Verify against the exact bytes Paystack signed. Re-serialising the parsed
+    // body would change the payload whenever key order or spacing differs.
+    const payload = req.rawBody?.toString('utf8') ?? JSON.stringify(req.body);
     return this.paymentsService.handleWebhook(signature, payload);
   }
 

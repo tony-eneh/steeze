@@ -1,4 +1,6 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from './common/pipes/validation.pipe';
@@ -9,7 +11,23 @@ import {
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // rawBody is needed so the Paystack webhook can verify signatures against the
+  // exact bytes Paystack signed rather than a re-serialised object.
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
+
+  // Render (and most PaaS) terminate TLS at a proxy, so the client IP used for
+  // rate limiting only comes through when the proxy headers are trusted.
+  app.set('trust proxy', 1);
+
+  app.use(
+    helmet({
+      // Swagger UI loads its own inline assets.
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
   // Global prefix
   app.setGlobalPrefix('api/v1');
