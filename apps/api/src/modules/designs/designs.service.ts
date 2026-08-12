@@ -145,6 +145,51 @@ export class DesignsService {
     };
   }
 
+  /**
+   * Everything the signed-in designer owns, including unpublished and
+   * deactivated designs. The public listings force isPublished, so a designer
+   * has no other way to see work in progress.
+   */
+  async findMine(userId: string, paginationDto: PaginationDto) {
+    const { page = 1, limit = 20 } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { designerProfile: true },
+    });
+
+    if (!user?.designerProfile) {
+      throw new ForbiddenException('Not a designer');
+    }
+
+    const where = { designerId: user.designerProfile.id };
+
+    const [designs, total] = await Promise.all([
+      this.prisma.design.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          images: { orderBy: { sortOrder: 'asc' } },
+          _count: { select: { orders: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.design.count({ where }),
+    ]);
+
+    return {
+      data: designs,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   async findOne(id: string) {
     const design = await this.prisma.design.findUnique({
       where: { id },

@@ -23,6 +23,7 @@ import { CreateFabricOptionDto } from './dto/create-fabric-option.dto';
 import { CreateAddOnDto } from './dto/create-addon.dto';
 import { CreateSizePricingDto } from './dto/create-size-pricing.dto';
 import { AddDesignImageDto } from './dto/add-design-image.dto';
+import { ListDesignsDto } from './dto/list-designs.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -65,23 +66,30 @@ export class DesignsController {
   @ApiQuery({ name: 'search', required: false })
   @ApiQuery({ name: 'sortBy', required: false })
   @ApiResponse({ status: 200, description: 'Designs retrieved' })
-  async findAll(
+  async findAll(@Query() query: ListDesignsDto) {
+    const { page, limit, ...filters } = query;
+    const result = await this.designsService.findAll({ page, limit }, filters);
+    return {
+      success: true,
+      ...result,
+      message: 'Designs retrieved successfully',
+    };
+  }
+
+  // Declared before :id so the literal path is not swallowed by the param.
+  @Get('mine')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.DESIGNER)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List every design owned by the signed-in designer',
+  })
+  @ApiResponse({ status: 200, description: 'Designs retrieved' })
+  async findMine(
+    @CurrentUser() user: AuthenticatedUser,
     @Query() paginationDto: PaginationDto,
-    @Query('category') category?: string,
-    @Query('gender') gender?: string,
-    @Query('minPrice') minPrice?: number,
-    @Query('maxPrice') maxPrice?: number,
-    @Query('search') search?: string,
-    @Query('sortBy') sortBy?: string,
   ) {
-    const result = await this.designsService.findAll(paginationDto, {
-      category,
-      gender,
-      minPrice,
-      maxPrice,
-      search,
-      sortBy,
-    });
+    const result = await this.designsService.findMine(user.id, paginationDto);
     return {
       success: true,
       ...result,
