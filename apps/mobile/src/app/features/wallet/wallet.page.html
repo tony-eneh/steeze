@@ -5,23 +5,85 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card>
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading your balance...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="!isLoading && !isDesigner">
     <ion-card-header>
-      <ion-card-title>Balance</ion-card-title>
-      <ion-card-subtitle>Designer earnings</ion-card-subtitle>
+      <ion-card-title>No balance to hold</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <div class="balance">NGN 120,450</div>
-      <ion-button class="primary" expand="block">Withdraw</ion-button>
+      <p>
+        Steeze does not keep a customer balance. What you pay is held in escrow
+        against the specific order and released to the designer only when you
+        confirm delivery, or refunded if the order is rejected.
+      </p>
+      <ion-button expand="block" fill="outline" routerLink="/tabs/orders">
+        View my orders
+      </ion-button>
     </ion-card-content>
   </ion-card>
 
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Transactions</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      Recent payouts and escrow releases will show here.
-    </ion-card-content>
-  </ion-card>
+  <ng-container *ngIf="earnings">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Balance</ion-card-title>
+        <ion-card-subtitle>Designer earnings</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="balance">
+          {{ earnings.availableBalance | number: '1.0-0' }}
+        </div>
+        <p class="note">
+          Payouts are arranged by Steeze. In-app withdrawal is not available
+          yet.
+        </p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Breakdown</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item>
+            <ion-label>Released from escrow</ion-label>
+            <ion-note slot="end">
+              {{ earnings.totalEarnings | number: '1.0-0' }}
+            </ion-note>
+          </ion-item>
+          <ion-item>
+            <ion-label>Still held in escrow</ion-label>
+            <ion-note slot="end">
+              {{ earnings.pendingEarnings | number: '1.0-0' }}
+            </ion-note>
+          </ion-item>
+          <ion-item>
+            <ion-label>Platform commission</ion-label>
+            <ion-note slot="end">
+              {{ earnings.totalCommission | number: '1.0-0' }}
+            </ion-note>
+          </ion-item>
+          <ion-item>
+            <ion-label>Return courier fees</ion-label>
+            <ion-note slot="end">
+              {{ earnings.totalReturnFees | number: '1.0-0' }}
+            </ion-note>
+          </ion-item>
+          <ion-item>
+            <ion-label>Net earnings</ion-label>
+            <ion-note slot="end">
+              {{ earnings.netEarnings | number: '1.0-0' }}
+            </ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
 </ion-content>

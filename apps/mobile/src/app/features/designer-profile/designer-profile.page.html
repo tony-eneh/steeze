@@ -5,28 +5,62 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div class="banner"></div>
-  <h2>Maison Atelier</h2>
-  <p class="subtitle">Bespoke tailoring · Lagos</p>
-
-  <ion-chip color="secondary">4.8 rating</ion-chip>
-  <ion-chip>120 orders</ion-chip>
-
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>About</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      Story-driven craftsmanship with premium fabrics and modern silhouettes.
-    </ion-card-content>
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading designer...</ion-card-content>
   </ion-card>
 
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Published designs</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      Explore this designer's latest catalog in Explore.
-    </ion-card-content>
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
   </ion-card>
+
+  <ng-container *ngIf="designer">
+    <div class="banner"></div>
+    <h2>{{ designer.businessName }}</h2>
+    <p class="subtitle">
+      {{ designer.shopCity }}<span *ngIf="designer.shopState">,
+      {{ designer.shopState }}</span>
+    </p>
+
+    <ion-chip color="secondary">
+      {{ designer.averageRating | number: '1.1-1' }} rating
+    </ion-chip>
+    <ion-chip>{{ designer.totalCompletedOrders }} orders</ion-chip>
+    <ion-chip *ngIf="designer.isVerified" color="success">Verified</ion-chip>
+
+    <ion-card *ngIf="designer.bio">
+      <ion-card-header>
+        <ion-card-title>About</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>{{ designer.bio }}</ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Published designs</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p *ngIf="!designs.length">
+          This designer has not published anything yet.
+        </p>
+        <ion-list *ngIf="designs.length">
+          <ion-item
+            *ngFor="let design of designs"
+            [routerLink]="['/designs', design.id]"
+            detail
+          >
+            <ion-thumbnail slot="start" *ngIf="primaryImage(design)">
+              <img [src]="primaryImage(design)" [alt]="design.title" />
+            </ion-thumbnail>
+            <ion-label>
+              <h3>{{ design.title }}</h3>
+              <p>
+                {{ design.currency }}
+                {{ design.basePrice | number: '1.0-0' }}
+              </p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
 </ion-content>

@@ -5,19 +5,51 @@
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <ion-item routerLink="/designer/orders/1">
+  <div class="ion-padding">
+    <ion-select
+      [(ngModel)]="status"
+      (ionChange)="onStatusChange()"
+      placeholder="All statuses"
+    >
+      <ion-select-option value="">All statuses</ion-select-option>
+      <ion-select-option *ngFor="let value of statuses" [value]="value">
+        {{ value }}
+      </ion-select-option>
+    </ion-select>
+  </div>
+
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading orders...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ion-list *ngIf="!isLoading && orders.length">
+    <ion-item
+      *ngFor="let order of orders"
+      [routerLink]="['/designer/orders', order.id]"
+      detail
+    >
       <ion-label>
-        <h3>STZ-20260210-1023</h3>
-        <p>Ready for pickup</p>
+        <h3>{{ order.orderNumber }}</h3>
+        <p>{{ order.design?.title }}</p>
+        <p *ngIf="order.customer">
+          {{ order.customer.firstName }} {{ order.customer.lastName }}
+        </p>
+        <p>{{ order.status }}</p>
       </ion-label>
-      <ion-badge color="secondary">New</ion-badge>
-    </ion-item>
-    <ion-item routerLink="/designer/orders/2">
-      <ion-label>
-        <h3>STZ-20260209-1104</h3>
-        <p>In progress</p>
-      </ion-label>
+      <ion-note slot="end">
+        {{ order.totalPrice | number: '1.0-0' }}<br />
+        <small>{{ order.createdAt | date: 'shortDate' }}</small>
+      </ion-note>
     </ion-item>
   </ion-list>
+
+  <app-empty-state
+    *ngIf="!isLoading && !orders.length && !errorMessage"
+    title="No orders here"
+    message="Orders matching this filter will appear as customers place them."
+  ></app-empty-state>
 </ion-content>

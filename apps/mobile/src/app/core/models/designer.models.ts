@@ -1,15 +1,38 @@
+/** Mirrors the shape returned by GET /designers/me/earnings. */
 export interface DesignerEarnings {
-  totalEarned: number;
-  pendingEscrow: number;
-  totalDeductions: number;
+  totalEarnings: number;
+  totalCommission: number;
+  totalReturnFees: number;
+  netEarnings: number;
+  pendingEarnings: number;
+  availableBalance: number;
+  totalCompletedOrders: number;
+  averageRating: number;
+}
+
+export interface DesignerOrder {
+  id: string;
+  orderNumber: string;
+  status: string;
+  totalPrice: number;
   currency: string;
-  transactions?: Array<{
+  createdAt: string;
+  customer?: {
     id: string;
-    type: string;
-    amount: number;
-    description?: string | null;
-    createdAt: string;
-  }>;
+    firstName: string;
+    lastName: string;
+    phone?: string | null;
+  };
+  design?: {
+    id: string;
+    title: string;
+    images?: Array<{ url: string }>;
+  };
+  deliveryAddress?: {
+    street: string;
+    city: string;
+    state: string;
+  };
 }
 
 export interface DesignerProfilePayload {
@@ -52,4 +75,16 @@ export interface UploadedAsset {
   height?: number;
   format?: string;
   bytes?: number;
+}
+
+export interface PublicDesigner {
+  id: string;
+  businessName: string;
+  slug: string;
+  bio?: string | null;
+  shopCity?: string | null;
+  shopState?: string | null;
+  averageRating: number;
+  totalCompletedOrders: number;
+  isVerified: boolean;
 }

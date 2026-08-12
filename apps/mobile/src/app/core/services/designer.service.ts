@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ApiConfigService } from './api-config.service';
 import { ApiResponse } from '../models/api.models';
-import { OrderSummary } from '../models/order.models';
+import { PaginatedResult } from '../models/engagement.models';
 import {
   DesignerEarnings,
+  DesignerOrder,
   DesignerProfilePayload,
   DesignPayload,
   ManagedDesign,
+  PublicDesigner,
   UploadedAsset
 } from '../models/designer.models';
 
@@ -18,6 +20,20 @@ export class DesignerService {
     private readonly apiConfig: ApiConfigService
   ) {}
 
+  // ===== Public profile =====
+
+  getPublicProfile(slug: string) {
+    return this.http.get<ApiResponse<PublicDesigner>>(
+      `${this.apiConfig.baseUrl}/designers/${slug}`
+    );
+  }
+
+  getPublicDesigns(slug: string) {
+    return this.http.get<ApiResponse<ManagedDesign[]>>(
+      `${this.apiConfig.baseUrl}/designers/${slug}/designs`
+    );
+  }
+
   // ===== Shop =====
 
   updateProfile(payload: DesignerProfilePayload) {
@@ -27,9 +43,17 @@ export class DesignerService {
     );
   }
 
-  listOrders() {
-    return this.http.get<ApiResponse<OrderSummary[]>>(
-      `${this.apiConfig.baseUrl}/designers/me/orders`
+  listOrders(status?: string) {
+    const query = status ? `?status=${encodeURIComponent(status)}` : '';
+
+    return this.http.get<ApiResponse<PaginatedResult<DesignerOrder>>>(
+      `${this.apiConfig.baseUrl}/designers/me/orders${query}`
+    );
+  }
+
+  getOrder(id: string) {
+    return this.http.get<ApiResponse<DesignerOrder>>(
+      `${this.apiConfig.baseUrl}/orders/${id}`
     );
   }
 
@@ -40,6 +64,19 @@ export class DesignerService {
   }
 
   // ===== Designs =====
+
+  /** Includes unpublished work, unlike the public design listings. */
+  listMyDesigns() {
+    return this.http.get<ApiResponse<PaginatedResult<ManagedDesign>>>(
+      `${this.apiConfig.baseUrl}/designs/mine`
+    );
+  }
+
+  getDesign(id: string) {
+    return this.http.get<ApiResponse<ManagedDesign>>(
+      `${this.apiConfig.baseUrl}/designs/${id}`
+    );
+  }
 
   createDesign(payload: DesignPayload) {
     return this.http.post<ApiResponse<ManagedDesign>>(

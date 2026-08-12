@@ -1,10 +1,18 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Design editor</ion-title>
+    <ion-title>{{ isEditing ? 'Edit design' : 'New design' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading design...</ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
   <ion-card>
     <ion-card-header>
       <ion-card-title>Design details</ion-card-title>
@@ -20,26 +28,92 @@
       </ion-item>
       <ion-item>
         <ion-label position="stacked">Base price</ion-label>
-        <ion-input [(ngModel)]="basePrice" type="number"></ion-input>
+        <ion-input [(ngModel)]="basePrice" type="number" min="0"></ion-input>
       </ion-item>
       <ion-item>
         <ion-label position="stacked">Category</ion-label>
-        <ion-input [(ngModel)]="category"></ion-input>
+        <ion-input
+          [(ngModel)]="category"
+          placeholder="agbada, gown, suit"
+        ></ion-input>
       </ion-item>
       <ion-item>
         <ion-label position="stacked">Estimated days</ion-label>
-        <ion-input [(ngModel)]="estimatedDays" type="number"></ion-input>
+        <ion-input
+          [(ngModel)]="estimatedDays"
+          type="number"
+          min="1"
+        ></ion-input>
       </ion-item>
-      <ion-button class="primary" expand="block">Save design</ion-button>
+      <ion-item>
+        <ion-label>Published</ion-label>
+        <ion-toggle slot="end" [(ngModel)]="isPublished"></ion-toggle>
+      </ion-item>
+      <ion-button
+        class="primary"
+        expand="block"
+        [disabled]="!canSave || isSaving"
+        (click)="save()"
+      >
+        {{ isSaving ? 'Saving...' : 'Save design' }}
+      </ion-button>
     </ion-card-content>
   </ion-card>
 
   <ion-card>
     <ion-card-header>
-      <ion-card-title>Images & options</ion-card-title>
+      <ion-card-title>Images</ion-card-title>
+      <ion-card-subtitle *ngIf="!isEditing">
+        Save the design first, then add photos.
+      </ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      Add fabric options, add-ons, and size pricing here.
+      <ng-container *ngIf="isEditing">
+        <ion-list *ngIf="design?.images?.length">
+          <ion-item *ngFor="let image of design?.images">
+            <ion-thumbnail slot="start">
+              <img [src]="image.url" alt="Design photo" />
+            </ion-thumbnail>
+            <ion-label>
+              <ion-badge *ngIf="image.isPrimary" color="success">
+                Thumbnail
+              </ion-badge>
+            </ion-label>
+            <ion-button
+              slot="end"
+              fill="clear"
+              color="danger"
+              size="small"
+              (click)="removeImage(image.id)"
+            >
+              Remove
+            </ion-button>
+          </ion-item>
+        </ion-list>
+
+        <p *ngIf="!design?.images?.length">No photos yet.</p>
+
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/avif"
+          [disabled]="isUploading"
+          (change)="onFileSelected($event)"
+        />
+        <p *ngIf="isUploading">Uploading...</p>
+        <p class="note">JPEG, PNG, WebP or AVIF, up to 5MB.</p>
+      </ng-container>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Fabrics, add-ons and sizes</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p class="note">
+        Fabric options, add-ons and size pricing are not editable in the app
+        yet. The API supports them, so they can be added here next.
+      </p>
     </ion-card-content>
   </ion-card>
 </ion-content>

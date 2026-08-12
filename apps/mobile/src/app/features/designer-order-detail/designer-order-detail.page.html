@@ -1,28 +1,95 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Order workflow</ion-title>
+    <ion-title>Order</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>STZ-20260210-1023</ion-card-title>
-      <ion-card-subtitle>Customer: Adaeze N.</ion-card-subtitle>
-    </ion-card-header>
-    <ion-card-content>
-      Measurements synced · Fabric: Ankara Cotton
-    </ion-card-content>
+  <ion-card *ngIf="isLoading">
+    <ion-card-content>Loading order...</ion-card-content>
   </ion-card>
 
-  <ion-list>
-    <ion-item>
-      <ion-label>Mark in progress</ion-label>
-      <ion-toggle slot="end"></ion-toggle>
-    </ion-item>
-    <ion-item>
-      <ion-label>Mark ready for pickup</ion-label>
-      <ion-toggle slot="end"></ion-toggle>
-    </ion-item>
-  </ion-list>
+  <ion-card *ngIf="errorMessage">
+    <ion-card-content>{{ errorMessage }}</ion-card-content>
+  </ion-card>
+
+  <ng-container *ngIf="order">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ order.orderNumber }}</ion-card-title>
+        <ion-card-subtitle>{{ order.status }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>{{ order.design?.title }}</p>
+        <p>
+          Total: {{ order.currency }}
+          {{ order.totalPrice | number: '1.0-0' }}
+        </p>
+        <p>Placed {{ order.createdAt | date: 'medium' }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="order.customer">
+      <ion-card-header>
+        <ion-card-title>Customer</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>{{ order.customer.firstName }} {{ order.customer.lastName }}</p>
+        <p *ngIf="order.customer.phone">{{ order.customer.phone }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="order.deliveryAddress">
+      <ion-card-header>
+        <ion-card-title>Deliver to</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>
+          {{ order.deliveryAddress.street }},
+          {{ order.deliveryAddress.city }},
+          {{ order.deliveryAddress.state }}
+        </p>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="actions">
+      <ion-button
+        *ngIf="canAccept"
+        class="primary"
+        expand="block"
+        [disabled]="isSubmitting"
+        (click)="accept()"
+      >
+        Accept order
+      </ion-button>
+      <ion-button
+        *ngIf="canAccept"
+        color="danger"
+        fill="outline"
+        expand="block"
+        [disabled]="isSubmitting"
+        (click)="reject()"
+      >
+        Reject order
+      </ion-button>
+      <ion-button
+        *ngIf="canStart"
+        class="primary"
+        expand="block"
+        [disabled]="isSubmitting"
+        (click)="start()"
+      >
+        Start work
+      </ion-button>
+      <ion-button
+        *ngIf="canMarkReady"
+        class="primary"
+        expand="block"
+        [disabled]="isSubmitting"
+        (click)="markReady()"
+      >
+        Mark ready for pickup
+      </ion-button>
+    </div>
+  </ng-container>
 </ion-content>
